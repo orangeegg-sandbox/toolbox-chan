@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-capability",
+  "description": "Clipboard access for explicitly requested image paste and text copy.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "clipboard-manager:allow-read-image",
+    "clipboard-manager:allow-write-text"
+  ]
+}

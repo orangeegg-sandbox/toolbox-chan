@@ -1,0 +1,98 @@
+:root {
+  color-scheme: light;
+  --bg: #fbfbfd;
+  --panel: #ffffff;
+  --inset: #f4f4f8;
+  --sidebar: #f6f7fa;
+  --text: #30323d;
+  --text-muted: #676a7b;
+  --text-subtle: #6c6f80;
+  --line: #e5e5ed;
+  --line-strong: #d2d1df;
+  --accent: #7660d4;
+  --accent-hover: #6751c4;
+  --accent-soft: #eeebfa;
+  --accent-line: #dcd3f2;
+  --accent-contrast: #ffffff;
+  --success: #39765c;
+  --success-soft: #edf6f0;
+  --success-line: #d4e7db;
+  --warning: #946820;
+  --warning-soft: #fff8e9;
+  --warning-line: #eddfbb;
+  --error: #ad4658;
+  --error-soft: #fff0f2;
+  --error-line: #f0d1d7;
+  --focus-ring: #a58de8;
+  --overlay: #17132555;
+  --shadow-sm: 0 2px 8px #25223808;
+  --shadow-lg: 0 12px 42px #21173520;
+  --purple: var(--accent);
+  --purple-dark: var(--accent-hover);
+  --muted: var(--text-muted);
+}
+
+/* The media fallback paints System correctly even before React mounts. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #15151d;
+    --panel: #20202b;
+    --inset: #191923;
+    --sidebar: #191921;
+    --text: #ececf3;
+    --text-muted: #b2b1c3;
+    --text-subtle: #9897aa;
+    --line: #333340;
+    --line-strong: #49485b;
+    --accent: #aa96f3;
+    --accent-hover: #bba9ff;
+    --accent-soft: #302942;
+    --accent-line: #51436f;
+    --accent-contrast: #20172f;
+    --success: #8bd4b1;
+    --success-soft: #1b3029;
+    --success-line: #355747;
+    --warning: #e4be78;
+    --warning-soft: #342b1e;
+    --warning-line: #5a4730;
+    --error: #f2a4ae;
+    --error-soft: #36232b;
+    --error-line: #67404a;
+    --focus-ring: #bba9ff;
+    --overlay: #06060bc4;
+    --shadow-sm: 0 2px 8px #00000018;
+    --shadow-lg: 0 12px 42px #00000055;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #15151d;
+  --panel: #20202b;
+  --inset: #191923;
+  --sidebar: #191921;
+  --text: #ececf3;
+  --text-muted: #b2b1c3;
+  --text-subtle: #9897aa;
+  --line: #333340;
+  --line-strong: #49485b;
+  --accent: #aa96f3;
+  --accent-hover: #bba9ff;
+  --accent-soft: #302942;
+  --accent-line: #51436f;
+  --accent-contrast: #20172f;
+  --success: #8bd4b1;
+  --success-soft: #1b3029;
+  --success-line: #355747;
+  --warning: #e4be78;
+  --warning-soft: #342b1e;
+  --warning-line: #5a4730;
+  --error: #f2a4ae;
+  --error-soft: #36232b;
+  --error-line: #67404a;
+  --focus-ring: #bba9ff;
+  --overlay: #06060bc4;
+  --shadow-sm: 0 2px 8px #00000018;
+  --shadow-lg: 0 12px 42px #00000055;
+}

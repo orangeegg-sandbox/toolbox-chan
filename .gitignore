@@ -1,0 +1,14 @@
+node_modules/
+dist/
+public/tools/
+src-tauri/target/
+src-tauri/gen/schemas/
+.tools/
+.npm-cache/
+.codebase-memory/
+test-results/
+playwright-report/
+release/
+*.tsbuildinfo
+*.log
+.DS_Store
