@@ -1,21 +1,83 @@
-# Image to text module
+# Image to text (OCR)
 
-`index.ts` exports `ocrTool`, the module manifest consumed by `src/tools/index.ts`. Its workspace, settings, and activity surfaces are loaded lazily. `OcrProvider` owns OCR state and actions; the core shell only sees the common `ToolDefinition` contract.
+[← Little Toolbox](../../../README.md)
 
-- `components/OcrWorkspace.tsx` fills the core `ToolPage` slots and composes two panels using `SplitPane`.
-- `components/OcrInputPanel.tsx` owns image selection and OCR options.
-- `components/OcrOutputPanel.tsx` owns progress, editable results, copy, and export actions.
-- `components/ImageWorkspace.tsx` owns zoom, selectable word overlays, and highlighted regions.
-- `services/` contains engine, provider, image, and image-clipboard code.
-- `storage.ts` retains the original release's local-storage keys for compatibility; those records belong exclusively to OCR.
-- `ocr.css` is scoped to `.ocr-tool`; shared controls and page layout come from core.
-- `scripts/prepare-assets.mjs` copies installed models/runtime files to `public/tools/ocr/`. The root `prepare-tools` script runs it automatically before dev/build.
-- `tests/` holds OCR unit and browser integration tests.
+Extract editable English and Chinese text from images. Recognition runs offline by default, with an optional online vision provider you configure yourself.
 
-The preview opens at actual size: 100% is one source image pixel per CSS pixel. Fit adapts to the viewport; preset zooms reach 400%. Scroll or enable the hand tool (middle-button dragging also works) to inspect any part of the image. Expand comparison keeps both panels visible and preserves zoom, scroll, and region selection; Escape restores the workspace.
+## Read an image
 
-Custom regions have visible reading-order numbers. Select a number in either panel to compare that crop with its editable result. Region edits update the combined text; editing All text removes the per-region text mapping. Copy and export always include the combined text. Regions and selectable overlays stay normalized to the source image, independent of zoom, workspace size, and the app's text-size preference.
+1. Choose, drop, or paste an image. Supported formats are PNG, JPEG, WebP, BMP, and GIF; GIFs are treated as a single image. Inputs can be up to 25 MB and 32 megapixels.
+2. Select **English**, **English + Traditional Chinese**, **English + Simplified Chinese**, or all three languages.
+3. Choose a mode and press **Extract text**.
+4. Review and edit the result, then copy it or export it as UTF-8 text.
 
-Native provider HTTP/cancellation logic is under `src-tauri/src/tools/ocr/online.rs`. Text export is shared infrastructure under `src-tauri/src/platform/` and `src/core/platform/`.
+| Mode | How to use it |
+| --- | --- |
+| **Simple** | Recognize the entire image. |
+| **Overlay** | Recognize the image, then drag across words on the image and copy the selection. Word positions are approximate. This mode uses the offline engine. |
+| **Custom** | Draw up to 12 rectangular regions. They are recognized in selection order. **Undo** removes the last highlight; **Select all** creates a keyboard-accessible whole-image region. |
 
-See [the module and layout guide](../../../docs/architecture.md) for the core contract and instructions for adding another tool.
+Rotation turns the image clockwise and clears selections and results. The original file is never modified.
+
+## Compare the image and text
+
+Images open at their actual pixel size: **100%** means one source-image pixel per CSS pixel. Use **Fit image**, **Actual size (100%)**, or the 10–400% zoom selector to adjust the view. Scroll, enable **Pan image**, or drag with the middle mouse button to inspect a larger image. Switch to **Draw regions** when adding Custom regions.
+
+**Expand comparison** gives both panels more room while preserving zoom, scroll, and selection. Press Escape or **Restore** to return to the normal workspace.
+
+Custom regions show their reading-order numbers. Select a number in either panel to compare that image area with its editable extracted text. Editing a region updates the combined result. Editing **All text** removes the per-region text mapping; copy and export always use the combined text.
+
+Toolbox **Settings** also provides appearance and font-size preferences. Increasing text size preserves the image's pixel scale and region coordinates.
+
+## Settings and recognition quality
+
+Choose the languages that match the image. For difficult documents, crop to the text and try **Scattered text** or **Single text block** in Settings. Printed text works best; handwriting, columns, tables, and unusual typography can require correction.
+
+Images longer than 3400 pixels on their longest side are downscaled for recognition, and small images are upscaled. The preview still lets you inspect the source image. Check the extracted text against the image before using it.
+
+## Optional online OCR
+
+In **Settings**, enter an OpenAI-compatible **Chat Completions** API base URL (for example, `https://api.openai.com/v1`), a vision model ID supported by your provider, and your own API key. Local providers can use `http://localhost:PORT/v1` without a key if they support it. Then select **Online · Vision API** in the OCR tool.
+
+The action becomes **Upload & extract text**. An image is sent only when you trigger recognition:
+
+- **Simple** sends the prepared image.
+- **Custom** sends only the selected crops, with one request per region.
+- **Overlay** uses offline OCR because online responses do not provide reliable word positions.
+
+Provider fees and data policies apply. The provider is instructed to transcribe the image in its original language rather than translate it. Check for omissions or invented text, as with any vision model.
+
+The endpoint, model, and API key live only in application memory and must be entered again after restarting. They are never written to saved preferences or history. Remote endpoints must use HTTPS; the native client rejects redirects. The desktop app sends requests through its native host to avoid browser CORS restrictions; browser preview requires a provider that permits CORS. Cancellation aborts the app's request, but a provider may already have started processing it.
+
+## Privacy and history
+
+Offline OCR includes its worker, WebAssembly engines, and language models inside the app. It needs no first-run downloads, external fonts, analytics, account, or OCR service. The operating system's webview is a platform prerequisite; a Windows installer may install WebView2 if it is missing.
+
+History stores the last 20 original OCR text results and filenames in local application storage. Images and API credentials are never saved. Result-editor changes apply to the current session. Turn off **Keep recent activity** to clear saved history and stop saving new results.
+
+Clearing history removes the app's local records; exports you saved separately remain on disk. Browser preview and the desktop app have separate local storage.
+
+## Shortcuts
+
+Use Ctrl on Windows/Linux and Command on macOS.
+
+| Action | Shortcut |
+| --- | --- |
+| Open image | Ctrl/Command + O |
+| Paste image | Ctrl/Command + V |
+| Extract text | Ctrl/Command + Enter |
+| Copy the entire result | Ctrl/Command + Shift + C |
+| Restore expanded comparison | Escape |
+| Find a tool | Ctrl/Command + K |
+
+## Development notes
+
+See the [development guide](../../../docs/development.md) for setup, builds, and checks, and the [architecture and module guide](../../../docs/architecture.md) for the core contract and layout rules.
+
+- `index.ts` exports `ocrTool`, the manifest registered in `src/tools/index.ts`. Workspace, settings, and activity surfaces load lazily; `OcrProvider.tsx` owns OCR state and actions.
+- `components/OcrWorkspace.tsx` fills core `ToolPage` slots using `SplitPane`. Input, output, and image interaction live in `OcrInputPanel.tsx`, `OcrOutputPanel.tsx`, and `ImageWorkspace.tsx`.
+- `services/` owns engine, provider, image, and image-clipboard code. `storage.ts` preserves the original release's local-storage keys. OCR styles are scoped to `.ocr-tool` in `ocr.css`.
+- Regions and selectable overlays use normalized source-image coordinates, independent of zoom, workspace size, and font size. Copy/export use the combined text even when a region is selected.
+- `scripts/prepare-assets.mjs` copies installed models and runtime files into `public/tools/ocr/`. The root preparation hook runs it before development/build. A worker stays warm between actions and releases its memory after 60 seconds of inactivity. See [third-party notices](../../../THIRD_PARTY_NOTICES.md).
+- Native provider requests and cancellation live in [online.rs](../../../src-tauri/src/tools/ocr/online.rs). Text export is shared infrastructure under `src-tauri/src/platform/` and `src/core/platform/`.
+- `tests/` contains OCR unit and browser integration tests.

@@ -15,6 +15,12 @@ Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 - Keep instructions scoped and concise; put implementation detail in `docs/architecture.md` or module READMEs. Do not hand-edit generated output.
 - Relevant checks: `npm run check`, `npm run test:e2e`, and `npm run check:native` for Rust changes.
 
+## Documentation
+- Keep the root `README.md` to a short app introduction, a Tools table, and links to shared documentation.
+- Give every Tools table row an icon, tool name, short description, and separate relative links to `src/tools/<id>/` and `src/tools/<id>/README.md`. Update the table when adding, renaming, or removing a tool.
+- Give every tool a user-facing README in its own folder with usage, settings, shortcuts, and relevant limitations; keep module-specific development notes there too.
+- Keep shared setup, builds, and checks in `docs/development.md`, and architecture details in `docs/architecture.md`.
+
 <!-- codebase-memory-mcp:start -->
 For structural codebase exploration, use the installed `codebase-memory` skill.
 <!-- codebase-memory-mcp:end -->
