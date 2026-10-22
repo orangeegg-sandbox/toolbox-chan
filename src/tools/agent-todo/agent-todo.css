@@ -1,0 +1,219 @@
+/* Agent TODO styles, scoped beneath .agent-todo-tool. Tokens: core/appearance/theme.css. */
+:where(.agent-todo-tool) .todo-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+:where(.agent-todo-tool) .todo-tabs {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--inset);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  gap: 2px;
+}
+:where(.agent-todo-tool) .todo-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+:where(.agent-todo-tool) .todo-tabs button:hover:not(.selected) {
+  color: var(--text);
+}
+:where(.agent-todo-tool) .todo-tabs button.selected {
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 500;
+  border-color: var(--line);
+}
+:where(.agent-todo-tool) .todo-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--text-subtle);
+}
+:where(.agent-todo-tool) .todo-toolbar-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+:where(.agent-todo-tool) .todo-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+:where(.agent-todo-tool) .todo-filter select {
+  max-width: 180px;
+}
+:where(.agent-todo-tool) .button.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+:where(.agent-todo-tool) .todo-description {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+:where(.agent-todo-tool) .tool-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+:where(.agent-todo-tool) .todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+:where(.agent-todo-tool) .todo-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+:where(.agent-todo-tool) .todo-item:last-child {
+  border-bottom: 0;
+}
+:where(.agent-todo-tool) .todo-item:hover {
+  background: var(--hover);
+}
+:where(.agent-todo-tool) .todo-item-main {
+  flex: 1;
+  min-width: 0;
+}
+:where(.agent-todo-tool) .todo-item-text {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+:where(.agent-todo-tool) .todo-item-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--text-subtle);
+}
+:where(.agent-todo-tool) .todo-meta-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+:where(.agent-todo-tool) .todo-chat {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+:where(.agent-todo-tool) .todo-chat svg {
+  vertical-align: -2px;
+  margin-right: var(--space-1);
+}
+:where(.agent-todo-tool) .todo-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--inset);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+:where(.agent-todo-tool) .todo-confirm p {
+  margin: 0;
+  color: var(--text);
+}
+:where(.agent-todo-tool) .todo-confirm-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+:where(.agent-todo-tool) .button.secondary.todo-danger {
+  color: var(--error);
+  border-color: var(--error-line);
+}
+:where(.agent-todo-tool) .button.secondary.todo-danger:hover:enabled {
+  background: var(--error-soft);
+  border-color: var(--error);
+}
+:where(.agent-todo-tool) .todo-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--text-subtle);
+}
+:where(.agent-todo-tool) .todo-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+:where(.agent-todo-tool) .todo-settings:focus {
+  outline: none;
+}
+:where(.agent-todo-tool) .todo-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+:where(.agent-todo-tool) .todo-settings-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+:where(.agent-todo-tool) .todo-settings-title h2 {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+:where(.agent-todo-tool) .todo-path {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  overflow-wrap: anywhere;
+}
+:where(.agent-todo-tool) .todo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+:where(.agent-todo-tool) .todo-rule-line {
+  margin: 0 var(--space-6) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+:where(.agent-todo-tool) .todo-spin {
+  animation: todo-spin 900ms linear infinite;
+}
+@keyframes todo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

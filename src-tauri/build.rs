@@ -13,6 +13,15 @@ const COMMANDS: &[&str] = &[
     "save_text",
     "online_ocr",
     "cancel_online_ocr",
+    "agent_todo_state",
+    "agent_todo_remove",
+    "agent_todo_restore",
+    "agent_todo_clear_history",
+    "agent_todo_set_paused",
+    "agent_todo_scan_now",
+    "agent_todo_rules",
+    "agent_todo_add_rule",
+    "agent_todo_remove_rule",
 ];
 
 fn main() {

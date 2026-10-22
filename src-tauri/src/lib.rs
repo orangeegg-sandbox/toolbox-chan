@@ -20,6 +20,9 @@ pub fn run() {
             platform::tray::install(app.handle())?;
             platform::tray::apply_autostart_default(app.handle());
             platform::pet_door::start(app.handle());
+            if let Err(error) = tools::agent_todo::start(app.handle()) {
+                eprintln!("Agent TODO could not start: {error}");
+            }
             // The main window starts hidden so a start with Windows stays in the tray.
             if !platform::tray::started_by_autostart() {
                 let _ = platform::tray::show_main(app.handle());
@@ -56,7 +59,16 @@ pub fn run() {
             platform::pet_events::pet_run_action,
             platform::text_export::save_text,
             tools::ocr::online::online_ocr,
-            tools::ocr::online::cancel_online_ocr
+            tools::ocr::online::cancel_online_ocr,
+            tools::agent_todo::agent_todo_state,
+            tools::agent_todo::agent_todo_remove,
+            tools::agent_todo::agent_todo_restore,
+            tools::agent_todo::agent_todo_clear_history,
+            tools::agent_todo::agent_todo_set_paused,
+            tools::agent_todo::agent_todo_scan_now,
+            tools::agent_todo::agent_todo_rules,
+            tools::agent_todo::agent_todo_add_rule,
+            tools::agent_todo::agent_todo_remove_rule
         ])
         .run(tauri::generate_context!())
         .expect("error while running Toolbox-Chan");

@@ -1,0 +1,2 @@
+*.zstd binary
+*.jsonl text eol=lf

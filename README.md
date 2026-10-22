@@ -9,6 +9,7 @@ The name's **Chan** comes from the affectionate Japanese suffix **ちゃん**, r
 | Tool | Description | Links |
 | --- | --- | --- |
 | 🔎 Image to text (OCR) | Extract, edit, copy, and export English and Chinese text from images. | [Folder](src/tools/ocr/) · [README](src/tools/ocr/README.md) |
+| ✅ Agent TODO | Collect plan steps your coding agents left unfinished and things they asked you to do, read offline from local chat files. | [Folder](src/tools/agent-todo/) · [README](src/tools/agent-todo/README.md) |
 
 ## More information
 

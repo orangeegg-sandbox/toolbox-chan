@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "agent-todo-capability",
+  "description": "Agent TODO in the toolbox window: read and change the reminder list, scan agent chats, and add or remove its instruction line.",
+  "windows": ["main"],
+  "permissions": [
+    "allow-agent-todo-state",
+    "allow-agent-todo-remove",
+    "allow-agent-todo-restore",
+    "allow-agent-todo-clear-history",
+    "allow-agent-todo-set-paused",
+    "allow-agent-todo-scan-now",
+    "allow-agent-todo-rules",
+    "allow-agent-todo-add-rule",
+    "allow-agent-todo-remove-rule"
+  ]
+}
