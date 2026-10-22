@@ -1,98 +1,169 @@
+/*
+ * Toolbox-Chan theme, "Mint Pocket Helper". The spec and usage rules live in
+ * docs/design-system.md. Components read the semantic tokens; --brand-* colors
+ * are for artwork and swatches only.
+ */
+:root {
+  /* Sampled from the character sheet (mode-stable). */
+  --brand-mint: #9bd6c5;
+  --brand-petrol: #2c5768;
+  --brand-lavender: #b899dc;
+  --brand-butter: #fed986;
+  --brand-ivory: #faf0e7;
+  --brand-ink: #16242b;
+
+  --font-sans:
+    "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
+    BlinkMacSystemFont, Inter, Roboto, sans-serif;
+  --font-mono:
+    "Cascadia Mono", "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono",
+    Menlo, ui-monospace, monospace;
+
+  /* Type scale; every step follows the text size preference. */
+  --fs-2xs: calc(9px * var(--ui-font-scale, 1));
+  --fs-xs: calc(10px * var(--ui-font-scale, 1));
+  --fs-sm: calc(11px * var(--ui-font-scale, 1));
+  --fs-md: calc(12px * var(--ui-font-scale, 1));
+  --fs-lg: calc(13px * var(--ui-font-scale, 1));
+  --fs-xl: calc(16px * var(--ui-font-scale, 1));
+  --fs-2xl: calc(20px * var(--ui-font-scale, 1));
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+}
+
 :root {
   color-scheme: light;
-  --bg: #fbfbfd;
+  --bg: #f5f7f7;
+  --sidebar: #eef2f2;
   --panel: #ffffff;
-  --inset: #f4f4f8;
-  --sidebar: #f6f7fa;
-  --text: #30323d;
-  --text-muted: #676a7b;
-  --text-subtle: #6c6f80;
-  --line: #e5e5ed;
-  --line-strong: #d2d1df;
-  --accent: #7660d4;
-  --accent-hover: #6751c4;
-  --accent-soft: #eeebfa;
-  --accent-line: #dcd3f2;
+  --inset: #f2f5f5;
+  --hover: #16242b0d;
+  --text: #172225;
+  --text-muted: #4d5b5e;
+  --text-subtle: #5f6c6f;
+  --line: #e1e7e7;
+  --line-strong: #c8d1d2;
+  /* Pine: mint darkened until white text passes AA. */
+  --accent: #1d6f5f;
+  --accent-hover: #175a4d;
+  --accent-soft: #e3f2ed;
+  --accent-line: #b5dccf;
   --accent-contrast: #ffffff;
-  --success: #39765c;
-  --success-soft: #edf6f0;
-  --success-line: #d4e7db;
-  --warning: #946820;
-  --warning-soft: #fff8e9;
-  --warning-line: #eddfbb;
-  --error: #ad4658;
-  --error-soft: #fff0f2;
-  --error-line: #f0d1d7;
-  --focus-ring: #a58de8;
-  --overlay: #17132555;
-  --shadow-sm: 0 2px 8px #25223808;
-  --shadow-lg: 0 12px 42px #21173520;
-  --purple: var(--accent);
-  --purple-dark: var(--accent-hover);
-  --muted: var(--text-muted);
+  /* Lavender (her eyes): focus and info. */
+  --lilac: #6b4ea0;
+  --lilac-soft: #f1ecf8;
+  --lilac-line: #dccdee;
+  /* Butter (her sticky note): notes, highlights, and warnings. */
+  --butter: #7a5600;
+  --butter-soft: #fff6d9;
+  --butter-line: #f0dc9f;
+  --success: #2a7a4a;
+  --success-soft: #e7f4ec;
+  --success-line: #bfe0cb;
+  --warning: #8a5d00;
+  --warning-soft: #fff6d9;
+  --warning-line: #f0dc9f;
+  --error: #b3343f;
+  --error-soft: #fdeeef;
+  --error-line: #f2c9cd;
+  --focus-ring: #7c5cb5;
+  --overlay: #101a1e66;
+  --shadow-sm: 0 1px 2px #101a1e0f;
+  --shadow-lg: 0 12px 32px #101a1e24, 0 2px 6px #101a1e0f;
 }
 
 /* The media fallback paints System correctly even before React mounts. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #15151d;
-    --panel: #20202b;
-    --inset: #191923;
-    --sidebar: #191921;
-    --text: #ececf3;
-    --text-muted: #b2b1c3;
-    --text-subtle: #9897aa;
-    --line: #333340;
-    --line-strong: #49485b;
-    --accent: #aa96f3;
-    --accent-hover: #bba9ff;
-    --accent-soft: #302942;
-    --accent-line: #51436f;
-    --accent-contrast: #20172f;
-    --success: #8bd4b1;
-    --success-soft: #1b3029;
-    --success-line: #355747;
-    --warning: #e4be78;
-    --warning-soft: #342b1e;
-    --warning-line: #5a4730;
-    --error: #f2a4ae;
-    --error-soft: #36232b;
-    --error-line: #67404a;
-    --focus-ring: #bba9ff;
-    --overlay: #06060bc4;
-    --shadow-sm: 0 2px 8px #00000018;
-    --shadow-lg: 0 12px 42px #00000055;
+    --bg: #111617;
+    --sidebar: #151b1c;
+    --panel: #1a2022;
+    --inset: #14191a;
+    --hover: #ffffff0d;
+    --text: #e3e9e9;
+    --text-muted: #a3afb1;
+    --text-subtle: #849193;
+    --line: #263033;
+    --line-strong: #36444a;
+    --accent: #9bd6c5;
+    --accent-hover: #b5e3d6;
+    --accent-soft: #1c322e;
+    --accent-line: #2f5a50;
+    --accent-contrast: #0f2a26;
+    --lilac: #c4a8ea;
+    --lilac-soft: #2a2436;
+    --lilac-line: #4a3d61;
+    --butter: #f2d083;
+    --butter-soft: #2b2617;
+    --butter-line: #5a4d2a;
+    --success: #8fd4a6;
+    --success-soft: #1a2e22;
+    --success-line: #2f5a3f;
+    --warning: #f2d083;
+    --warning-soft: #2b2617;
+    --warning-line: #5a4d2a;
+    --error: #f0a2a8;
+    --error-soft: #341f23;
+    --error-line: #6a3a40;
+    --focus-ring: #c4a8ea;
+    --overlay: #05090ab3;
+    --shadow-sm: 0 1px 2px #0000004d;
+    --shadow-lg: 0 16px 40px #00000080, 0 2px 8px #0000004d;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #15151d;
-  --panel: #20202b;
-  --inset: #191923;
-  --sidebar: #191921;
-  --text: #ececf3;
-  --text-muted: #b2b1c3;
-  --text-subtle: #9897aa;
-  --line: #333340;
-  --line-strong: #49485b;
-  --accent: #aa96f3;
-  --accent-hover: #bba9ff;
-  --accent-soft: #302942;
-  --accent-line: #51436f;
-  --accent-contrast: #20172f;
-  --success: #8bd4b1;
-  --success-soft: #1b3029;
-  --success-line: #355747;
-  --warning: #e4be78;
-  --warning-soft: #342b1e;
-  --warning-line: #5a4730;
-  --error: #f2a4ae;
-  --error-soft: #36232b;
-  --error-line: #67404a;
-  --focus-ring: #bba9ff;
-  --overlay: #06060bc4;
-  --shadow-sm: 0 2px 8px #00000018;
-  --shadow-lg: 0 12px 42px #00000055;
+  --bg: #111617;
+  --sidebar: #151b1c;
+  --panel: #1a2022;
+  --inset: #14191a;
+  --hover: #ffffff0d;
+  --text: #e3e9e9;
+  --text-muted: #a3afb1;
+  --text-subtle: #849193;
+  --line: #263033;
+  --line-strong: #36444a;
+  --accent: #9bd6c5;
+  --accent-hover: #b5e3d6;
+  --accent-soft: #1c322e;
+  --accent-line: #2f5a50;
+  --accent-contrast: #0f2a26;
+  --lilac: #c4a8ea;
+  --lilac-soft: #2a2436;
+  --lilac-line: #4a3d61;
+  --butter: #f2d083;
+  --butter-soft: #2b2617;
+  --butter-line: #5a4d2a;
+  --success: #8fd4a6;
+  --success-soft: #1a2e22;
+  --success-line: #2f5a3f;
+  --warning: #f2d083;
+  --warning-soft: #2b2617;
+  --warning-line: #5a4d2a;
+  --error: #f0a2a8;
+  --error-soft: #341f23;
+  --error-line: #6a3a40;
+  --focus-ring: #c4a8ea;
+  --overlay: #05090ab3;
+  --shadow-sm: 0 1px 2px #0000004d;
+  --shadow-lg: 0 16px 40px #00000080, 0 2px 8px #0000004d;
 }

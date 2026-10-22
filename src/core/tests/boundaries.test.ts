@@ -4,12 +4,14 @@ import ts from "typescript";
 import { expect, it } from "vitest";
 
 const sourceRoot = resolve(import.meta.dirname, "../..");
+const coreRoot = join(sourceRoot, "core");
+const coreSdk = join(coreRoot, "sdk");
 const toolsRoot = join(sourceRoot, "tools");
 function files(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
     entry.isDirectory()
       ? files(join(directory, entry.name))
-      : /\.(ts|tsx)$/.test(entry.name)
+      : /\.(ts|tsx|mjs)$/.test(entry.name)
         ? [join(directory, entry.name)]
         : [],
   );
@@ -41,31 +43,34 @@ function dependencies(file: string): string[] {
   visit(source);
   return imports
     .filter((name) => name.startsWith("."))
-    .map((name) => resolve(dirname(file), name));
+    .map((name) => resolve(dirname(file), name).replace(/\.(ts|tsx)$/, ""));
 }
 
 it("keeps core independent of tool implementations and tools independent of siblings", () => {
   const violations: string[] = [];
-  for (const file of files(join(sourceRoot, "core"))) {
+  for (const file of files(coreRoot)) {
     for (const dependency of dependencies(file))
       if (dependency.startsWith(toolsRoot + sep))
         violations.push(
           `${relative(sourceRoot, file)} imports ${relative(sourceRoot, dependency)}`,
         );
   }
-  for (const entry of readdirSync(toolsRoot, { withFileTypes: true }).filter(
-    (entry) => entry.isDirectory(),
-  )) {
-    for (const file of files(join(toolsRoot, entry.name))) {
-      for (const dependency of dependencies(file)) {
-        if (
-          dependency.startsWith(toolsRoot + sep) &&
-          relative(toolsRoot, dependency).split(sep)[0] !== entry.name
-        )
-          violations.push(
-            `${relative(sourceRoot, file)} imports a sibling tool`,
-          );
-      }
+  for (const file of files(toolsRoot)) {
+    // The registry (tools/index.ts) is the one file that may import every tool.
+    const [owner, ...rest] = relative(toolsRoot, file).split(sep);
+    for (const dependency of dependencies(file)) {
+      if (
+        rest.length &&
+        dependency.startsWith(toolsRoot + sep) &&
+        relative(toolsRoot, dependency).split(sep)[0] !== owner
+      )
+        violations.push(
+          `${relative(sourceRoot, file)} imports a sibling tool`,
+        );
+      if (dependency.startsWith(coreRoot + sep) && dependency !== coreSdk)
+        violations.push(
+          `${relative(sourceRoot, file)} imports ${relative(sourceRoot, dependency)}; use core/sdk`,
+        );
     }
   }
   expect(violations).toEqual([]);

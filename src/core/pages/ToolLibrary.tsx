@@ -1,52 +1,49 @@
-import { ArrowRight, Layers3 } from "lucide-react";
 import { useToolbox } from "../ToolboxContext";
+import { EmptyState } from "../layout";
+import { usePaletteShortcut } from "../commands/ShortcutProvider";
+import toolboxChan from "../assets/toolbox-chan.png";
 
 export function ToolLibrary() {
   const { tools, openTool } = useToolbox();
+  const { shortcutLabel } = usePaletteShortcut();
   return (
     <>
-      <div className="section-eyebrow">A LITTLE HELP, EVERY DAY</div>
-      <h1>Your everyday, a little easier.</h1>
-      <p className="page-intro">
-        A home for the small tools that make a big difference.
-      </p>
       <div className="library-heading">
-        <h2>
+        <h1>
           All tools{" "}
           <span className="small-tag">
             {String(tools.length).padStart(2, "0")}
           </span>
-        </h2>
-        <span>Built to do one thing well.</span>
+        </h1>
+        <p className="page-intro">
+          Open a tool, or press <kbd>{shortcutLabel}</kbd> to search tools and actions.
+        </p>
       </div>
-      <div className="tool-cards">
-        {tools.map((tool) => (
-          <button
-            className="tool-card"
-            key={tool.id}
-            onClick={() => openTool(tool.id)}
-          >
-            <div className="tool-card-top">
-              <span className="heading-icon">
-                <tool.icon size={26} />
-              </span>
-              <span className="small-tag">READY TO USE</span>
-            </div>
-            <h2>{tool.name}</h2>
-            <p>{tool.description}</p>
-            <div>
-              <span>{tool.category}</span>
-              <ArrowRight size={17} />
-            </div>
-          </button>
-        ))}
-        <div className="future-card">
-          <Layers3 size={28} strokeWidth={1.2} />
-          <h3>Room for your next idea.</h3>
-          <p>More utilities and custom macros can live here.</p>
-          <span>YOUR TOOLBOX, GROWING WITH YOU</span>
-        </div>
-      </div>
+      {tools.length ? (
+        <>
+          <div className="tool-cards">
+            {tools.map((tool) => (
+              <button
+                className="tool-card"
+                key={tool.id}
+                onClick={() => openTool(tool.id)}
+              >
+                <span className="heading-icon">
+                  <tool.icon size={18} />
+                </span>
+                <strong>{tool.name}</strong>
+                <span className="tool-card-description">{tool.description}</span>
+                <span className="tool-card-meta">{tool.category}</span>
+              </button>
+            ))}
+          </div>
+          <img className="idle-mascot" src={toolboxChan} alt="" width="1024" height="1536" />
+        </>
+      ) : (
+        <EmptyState title="No tools installed" mascot>
+          Register a tool module in src/tools/index.ts and it appears here.
+        </EmptyState>
+      )}
     </>
   );
 }

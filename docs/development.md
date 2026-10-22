@@ -1,8 +1,8 @@
 # Development and setup
 
-[← Little Toolbox](../README.md)
+[← Toolbox-Chan](../README.md)
 
-Little Toolbox uses Tauri 2 for its desktop host, React and TypeScript for its UI, and independent modules for each tool.
+Toolbox-Chan uses Tauri 2 for its desktop host, React and TypeScript for its UI, and independent modules for each tool.
 
 ## Run locally
 
@@ -35,11 +35,23 @@ Browser tests use installed Microsoft Edge on Windows. On macOS/Linux, run `npx 
 
 On Windows, run the built app at `src-tauri/target/release/little-toolbox.exe`, or install the setup executable in `src-tauri/target/release/bundle/nsis/`.
 
+Internal package names, the executable name, the bundle identifier, and saved preference keys retain their existing identifiers so the Toolbox-Chan rename preserves compatibility.
+
 The [desktop build workflow](../.github/workflows/desktop.yml) supports manual runs and version tags. Build each platform on that platform; macOS/Linux packages need verification on their respective systems. Installers are unsigned until signing identities are configured.
 
 ## Preferences
 
-Open **Settings** to choose **Light**, **Dark**, or **System** appearance. System follows the device's appearance as it changes. **Font size** offers Small (100%), Medium (125%), Large (150%), and Extra large (175%), with a live example. Medium is the default. Both preferences apply throughout the toolbox and are saved locally; browser preview and the desktop app use separate local storage.
+Open **Settings** for global preferences: appearance, font size, and the command palette shortcut. Choose **Light**, **Dark**, or **System** appearance. System follows the device's appearance as it changes. **Font size** offers Small (100%), Medium (125%), Large (150%), and Extra large (175%), with a live example. Medium is the default. Preferences apply throughout the toolbox and are saved locally; browser preview and the desktop app use separate local storage. Tool-specific preferences belong on their own tool pages; for example, open **Image to text → OCR settings** for recognition, online providers, and OCR history.
+
+Both appearances use Toolbox-Chan's **Mint Pocket Helper** palette: mint, deep teal, lilac, butter yellow, and ivory. Light mode uses warm surfaces; dark mode uses deep teal surfaces. The sidebar portrait and tool-library character come from the approved [design reference](design/toolbox-chan/mint-pocket-helper-v2/). Bundled copies live in `src/core/assets/`, with shared colors in `src/core/appearance/theme.css`.
+
+## Command palette
+
+Press and release **Ctrl + Shift twice** within half a second to open the command palette. On Windows desktop, a separate floating palette appears over other apps while the main toolbox stays minimized. Choosing a tool or action restores the main window and uses your existing session. **Escape** or clicking another window hides the floating palette without restoring the toolbox. In browser preview and on other platforms, shortcuts work while the toolbox is focused. **Ctrl/Command + K** and the sidebar search button open the in-app palette.
+
+Search by tool name, ID, description, or keyword. Type **ocr**, then press **Enter** to open Image to text. Use **↑ / ↓**, **Home / End**, and **Enter** to select and run a result; **Escape** or a click outside closes the palette. Type **>** to show actions only. Actions that need an image or extracted text show as unavailable until ready.
+
+Under **Settings → Command palette**, select **Record shortcut** and press a combination with Ctrl, Alt, or Windows/Command. **Escape** cancels recording; **Restore default** returns to the double tap. The preference is stored locally. Windows reports reserved or already registered combinations so you can choose another. The app must remain running for a global shortcut to work; closing the window exits the app.
 
 ## Assets and native tooling
 
@@ -49,7 +61,7 @@ Open **Settings** to choose **Light**, **Dark**, or **System** appearance. Syste
 
 ## Add a tool
 
-Place each tool in `src/tools/<id>/` with its manifest, UI, state, services, styles, README, and tests, then register it in `src/tools/index.ts`. The core supplies navigation, settings, activity, and shared layouts through the `ToolDefinition` contract and `ToolPage`, `SplitPane`, and `ToolPanel` components.
+Place each tool in `src/tools/<id>/` with its manifest, UI, state, services, styles, README, and tests, then register it in `src/tools/index.ts`. Import core only from `src/core/sdk.ts`: it supplies the `ToolDefinition` contract, `ToolPage`, `SplitPane`, and `ToolPanel` layouts, and shared services. Render tool preferences inside its workspace. For palette actions, provide a tool-owned class extending `ToolCommandHandler`, give every command ID a `<id>.` prefix, and register it through `useToolCommands(handler, state)` in the manifest's `Commands` component. Native commands go in `src-tauri/src/tools/<id>/`, the command list in `src-tauri/build.rs`, and their permissions in `src-tauri/capabilities/<id>.json`.
 
 Add a row to the [main README's Tools table](../README.md#tools) with an icon, tool name, short description, and links to the tool folder and its README. Keep usage instructions in the tool's README.
 

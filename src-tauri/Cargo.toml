@@ -2,7 +2,7 @@
 name = "little-toolbox"
 version = "0.1.0"
 description = "Your small, offline desktop toolbox"
-authors = ["Little Toolbox"]
+authors = ["Toolbox-Chan"]
 edition = "2021"
 
 [lib]
@@ -19,3 +19,6 @@ tauri-plugin-dialog = "2"
 serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 tokio = { version = "1", features = ["sync", "macros"] }
+
+[dev-dependencies]
+tauri = { version = "2", features = ["test"] }

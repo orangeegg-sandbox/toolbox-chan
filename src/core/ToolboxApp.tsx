@@ -7,14 +7,12 @@ import {
   useState,
 } from "react";
 import {
-  Box,
   Check,
   ChevronRight,
   CircleHelp,
   Keyboard,
   LoaderCircle,
   X,
-  Zap,
 } from "lucide-react";
 import type { ToolDefinition, ToolboxRoute } from "./tools/contracts";
 import { createToolRegistry } from "./tools/registry";
@@ -23,9 +21,17 @@ import { Sidebar } from "./components/Sidebar";
 import { ToolboxDialogs } from "./components/ToolboxDialogs";
 import { ToolLibrary } from "./pages/ToolLibrary";
 import { ContributionsPage } from "./pages/ContributionsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { ThemeProvider } from "./appearance/ThemeProvider";
 import { FontSizeProvider } from "./appearance/FontSizeProvider";
+import { CommandProvider, ToolCommandScope } from "./commands/CommandProvider";
+import { ShortcutProvider, usePaletteShortcut } from "./commands/ShortcutProvider";
+import { createShortcutMatcher } from "./commands/shortcuts";
+import { CommandPalette } from "./components/CommandPalette";
+import { usePaletteCommands } from "./commands/usePaletteCommands";
+import { useDesktopPalette } from "./commands/useDesktopPalette";
 import "./styles.css";
+import "./commands/palette.css";
 
 export function ToolboxApp({ tools }: { tools: readonly ToolDefinition[] }) {
   const registry = useMemo(() => createToolRegistry(tools), [tools]);
@@ -88,7 +94,9 @@ export function ToolboxApp({ tools }: { tools: readonly ToolDefinition[] }) {
     <ThemeProvider>
       <FontSizeProvider>
         <ToolboxContext.Provider value={services}>
-          {content}
+          <ShortcutProvider>
+            <CommandProvider>{content}</CommandProvider>
+          </ShortcutProvider>
           {notice && (
             <div
               className={`toast ${notice.error ? "toast-error" : ""}`}
@@ -114,7 +122,15 @@ export function ToolboxApp({ tools }: { tools: readonly ToolDefinition[] }) {
 function ToolboxShell() {
   const { tools, route } = useToolbox();
   const help = useRef<HTMLDialogElement>(null);
-  const palette = useRef<HTMLDialogElement>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const { shortcut, shortcutLabel, nativeActive, nativeRequest, recording } = usePaletteShortcut();
+  const openPalette = useCallback(() => {
+    help.current?.close();
+    setPaletteOpen(true);
+  }, []);
+  const openHelp = useCallback(() => help.current?.showModal(), []);
+  const paletteCommands = usePaletteCommands(openHelp);
+  useDesktopPalette(paletteCommands, shortcutLabel);
   const activeTool =
     route.page === "tool"
       ? tools.find((tool) => tool.id === route.toolId)
@@ -129,24 +145,40 @@ function ToolboxShell() {
   const Status = activeTool?.Status;
   const Workspace = activeTool?.Workspace;
   useEffect(() => {
-    document.title = `Little Toolbox — ${title}`;
+    document.title = `Toolbox-Chan — ${title}`;
   }, [title]);
   useEffect(() => {
+    const matcher = createShortcutMatcher(shortcut, openPalette);
     const keydown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      if (recording || event.isComposing) return;
+      if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        if (!help.current?.open && !palette.current?.open)
-          palette.current?.showModal();
+        if (!event.repeat) openPalette();
+        return;
+      }
+      if (!nativeActive && matcher.keydown(event)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
       }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
-  }, []);
+    const keyup = (event: KeyboardEvent) => { if (!recording && !nativeActive) matcher.keyup(event); };
+    document.addEventListener("keydown", keydown, true);
+    document.addEventListener("keyup", keyup);
+    window.addEventListener("blur", matcher.reset);
+    return () => {
+      document.removeEventListener("keydown", keydown, true);
+      document.removeEventListener("keyup", keyup);
+      window.removeEventListener("blur", matcher.reset);
+    };
+  }, [shortcut, recording, nativeActive, openPalette]);
+  useEffect(() => {
+    if (nativeRequest) openPalette();
+  }, [nativeRequest, openPalette]);
   return (
     <div className="app-shell">
       <Sidebar
-        onSearch={() => palette.current?.showModal()}
-        onHelp={() => help.current?.showModal()}
+        onSearch={openPalette}
+        onHelp={openHelp}
       />
       <div className="main-shell">
         <header className="topbar">
@@ -155,14 +187,7 @@ function ToolboxShell() {
             <ChevronRight size={13} />
             <strong>{title}</strong>
           </div>
-          {Status ? (
-            <Status />
-          ) : (
-            <div className="privacy-pill">
-              <span className="green-dot" />
-              Local by default
-            </div>
-          )}
+          {Status && <Status />}
           <button
             className="icon-button top-help"
             title="Keyboard shortcuts"
@@ -185,24 +210,19 @@ function ToolboxShell() {
               <Workspace key={activeTool.id} tool={activeTool} />
             ) : route.page === "tools" ? (
               <ToolLibrary />
+            ) : route.page === "history" ? (
+              <ContributionsPage />
             ) : (
-              <ContributionsPage
-                surface={route.page === "history" ? "Activity" : "Settings"}
-              />
+              <SettingsPage />
             )}
           </Suspense>
         </main>
-        <footer className="app-footer">
-          <span>
-            <Box size={13} />A little tool. A little time back.
-          </span>
-          <span>
-            <Zap size={12} />
-            Built for the little things.
-          </span>
-        </footer>
       </div>
-      <ToolboxDialogs help={help} palette={palette} activeTool={activeTool} />
+      {tools.map((tool) => tool.Commands ? (
+        <ToolCommandScope key={tool.id} toolId={tool.id}><tool.Commands /></ToolCommandScope>
+      ) : null)}
+      <ToolboxDialogs help={help} activeTool={activeTool} />
+      {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} onHelp={openHelp} />}
     </div>
   );
 }

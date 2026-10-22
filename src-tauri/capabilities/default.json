@@ -1,11 +1,14 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
-  "description": "Clipboard access for explicitly requested image paste and text copy.",
+  "description": "Core services for the toolbox window: text copy and export, and the palette shortcut and cache.",
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "clipboard-manager:allow-read-image",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    "allow-save-text",
+    "allow-set-palette-shortcut",
+    "allow-palette-update-snapshot",
+    "allow-palette-show"
   ]
 }

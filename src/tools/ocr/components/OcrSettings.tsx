@@ -20,7 +20,7 @@ export default function OcrSettings() {
     removeHistory,
   } = useOcr();
   return (
-    <div className="ocr-tool">
+    <div className="ocr-settings-content">
       <section className="settings-card">
         <div className="settings-section-heading">
           <ScanLine size={18} />
@@ -178,7 +178,7 @@ export default function OcrSettings() {
           </div>
           <button
             className="button secondary"
-            disabled={!history.length}
+            disabled={busy || !history.length}
             onClick={() => removeHistory()}
           >
             Clear {history.length} results

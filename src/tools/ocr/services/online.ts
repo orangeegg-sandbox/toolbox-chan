@@ -6,7 +6,7 @@ export function validateEndpoint(endpoint: string): string {
   try {
     url = new URL(endpoint);
   } catch {
-    throw new Error("Enter a valid API base URL in Settings.");
+    throw new Error("Enter a valid API base URL in OCR settings.");
   }
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
   if (url.protocol !== "https:" && !(local && url.protocol === "http:"))
@@ -26,7 +26,7 @@ export async function recognizeOnline(
 ) {
   const endpoint = validateEndpoint(config.endpoint);
   if (!config.model.trim())
-    throw new Error("Enter your vision model name in Settings.");
+    throw new Error("Enter your vision model name in OCR settings.");
   const image = canvas.toDataURL("image/png");
   const body = {
     model: config.model.trim(),

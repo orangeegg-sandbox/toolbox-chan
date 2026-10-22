@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Little Toolbox",
+  "productName": "Toolbox-Chan",
   "version": "0.1.0",
   "identifier": "com.littletoolbox.desktop",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Little Toolbox",
+        "title": "Toolbox-Chan",
         "width": 1220,
         "height": 940,
         "minWidth": 780,

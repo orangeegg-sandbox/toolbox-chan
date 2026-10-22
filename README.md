@@ -1,6 +1,8 @@
-# Little Toolbox
+# Toolbox-Chan
 
 A lightweight desktop app for everyday utilities. Tools work offline by default, with optional online features when you choose to use them. Light and dark themes, adjustable text size, and a shared workspace keep everything comfortable to use.
+
+The name's **Chan** comes from the affectionate Japanese suffix **ちゃん**, reflecting a friendly, helpful companion for everyday tasks.
 
 ## Tools
 
@@ -10,4 +12,4 @@ A lightweight desktop app for everyday utilities. Tools work offline by default,
 
 ## More information
 
-[Development and setup](docs/development.md) · [Architecture and adding tools](docs/architecture.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Development and setup](docs/development.md) · [Architecture and adding tools](docs/architecture.md) · [Design system](docs/design-system.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)

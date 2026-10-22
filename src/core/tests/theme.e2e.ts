@@ -111,10 +111,20 @@ test("dark settings, library, search, and help keep dark surfaces and readable t
   await expectReadableDarkSurface(page.locator(".tool-card").first());
   await page.keyboard.press("Control+k");
   await expectReadableDarkSurface(page.locator(".command-dialog"));
-  await expectReadableDarkSurface(page.getByRole("textbox", { name: "Find a tool", exact: true }));
+  await expectReadableDarkSurface(page.getByRole("combobox", { name: "Find a tool", exact: true }));
   await page.getByRole("button", { name: "Close search" }).click();
 
   await page.getByRole("button", { name: "Keyboard shortcuts", exact: true }).click();
   await expectReadableDarkSurface(page.locator(".help-dialog"));
   await expectReadableDarkSurface(page.locator(".shortcut-list kbd").first());
+});
+
+test("dark appearance and larger-text examples are visible together", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1100 });
+  await page.goto(fixture);
+  const theme = await openSettings(page);
+  await theme.selectOption("dark");
+  await page.getByLabel("Font size", { exact: true }).selectOption("125");
+  await expect(page.getByRole("group", { name: "Font size preview" })).toBeVisible();
+  await page.screenshot({ path: "test-results/ui-settings-dark.png", fullPage: false, animations: "disabled" });
 });

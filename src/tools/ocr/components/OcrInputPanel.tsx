@@ -2,16 +2,16 @@ import {
   ChevronDown,
   Clipboard,
   ImagePlus,
+  ImageUp,
   LoaderCircle,
   ScanLine,
-  Sparkles,
   Upload,
   X,
 } from "lucide-react";
 import { Language } from "../types";
 import { LANGUAGES } from "../types";
 import { errorMessage } from "../utils";
-import { ToolPanel } from "../../../core/layout";
+import { ToolPanel } from "../../../core/sdk";
 import ImageWorkspace from "./ImageWorkspace";
 import { rotatedImage } from "../services/images";
 import { useOcr } from "../OcrProvider";
@@ -111,25 +111,9 @@ export default function OcrInputPanel() {
               if (!busy) fileInput.current?.click();
             }}
           >
-            <div className="upload-illustration" aria-hidden="true">
-              <div className="illustration-back" />
-              <div className="illustration-page">
-                <div className="mini-image">
-                  <span />
-                  <i />
-                  <b />
-                </div>
-                <div className="illustration-lines">
-                  <i />
-                  <i />
-                  <i />
-                </div>
-              </div>
-              <span className="illustration-spark">
-                <Sparkles size={19} />
-              </span>
-              <span className="illustration-plus">+</span>
-            </div>
+            <span className="dropzone-icon" aria-hidden="true">
+              <ImageUp size={22} strokeWidth={1.75} />
+            </span>
             <h3>Drop an image here</h3>
             <p>or choose a file from your computer</p>
             <button

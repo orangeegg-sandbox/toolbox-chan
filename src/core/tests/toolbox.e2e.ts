@@ -19,11 +19,15 @@ test("the shell mounts independent tools into its layout and preserves module st
     .getByRole("button", { name: "Notes fixture", exact: true })
     .click();
   await page.getByLabel("Fixture note").fill("Independent module state");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
-  await page.getByLabel("Counter step").fill("3");
   await page
     .getByRole("button", { name: "Counter fixture", exact: true })
     .click();
+  await page.getByLabel("Counter step").fill("3");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(page.getByLabel("Counter step")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Appearance", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Counter fixture", exact: true }).click();
+  await expect(page.getByLabel("Counter step")).toHaveValue("3");
   await page.getByRole("button", { name: "Increment counter" }).click();
   await expect(page.getByLabel("Counter value")).toHaveText("4");
   await page
@@ -45,11 +49,11 @@ test("registry entries populate navigation, library, search, and optional contri
   );
   await page.keyboard.press("Control+k");
   await page
-    .getByRole("textbox", { name: "Find a tool", exact: true })
+    .getByRole("combobox", { name: "Find a tool", exact: true })
     .fill("Notes");
   await page
     .locator(".command-results")
-    .getByRole("button", { name: "Notes fixture" })
+    .getByRole("option", { name: /Notes fixture/ })
     .click();
   await expect(
     page.getByRole("heading", { name: "Notes fixture", exact: true }),
@@ -68,7 +72,7 @@ test("the core also works with no tool modules registered", async ({
   await expect(page.locator(".tool-card")).toHaveCount(0);
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(
-    page.getByText("Your installed tools have no settings yet."),
+    page.getByRole("region", { name: "Command palette", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Recent activity", exact: true })

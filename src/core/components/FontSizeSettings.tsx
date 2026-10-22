@@ -18,7 +18,7 @@ export function FontSizeSettings() {
       aria-labelledby={`${id}-heading`}
     >
       <div className="settings-section-heading">
-        <Type size={18} aria-hidden="true" />
+        <Type size={16} aria-hidden="true" />
         <h2 id={`${id}-heading`}>Text size</h2>
       </div>
       <div className="font-size-setting-row">
@@ -55,8 +55,8 @@ export function FontSizeSettings() {
             {level.label} · {fontSize}%
           </output>
         </div>
-        <h3>A little easier to read.</h3>
-        <p>Give your everyday tasks a comfortable amount of space.</p>
+        <h3>Extracted text looks like this</h3>
+        <p>Labels, menus, and controls scale with it.</p>
         <label className="font-size-preview-control">
           Example input
           <input type="text" value="Your text, at this size" readOnly />

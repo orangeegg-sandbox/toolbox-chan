@@ -6,7 +6,7 @@ import {
   FileText,
   ScanLine,
 } from "lucide-react";
-import { ToolPanel } from "../../../core/layout";
+import { ToolPanel } from "../../../core/sdk";
 import { useOcr } from "../OcrProvider";
 export default function OcrOutputPanel() {
   const {
@@ -70,7 +70,7 @@ export default function OcrOutputPanel() {
             <div className="scan-animation">
               <ScanLine size={32} strokeWidth={1.3} />
             </div>
-            <h3>Finding the words…</h3>
+            <h3>Recognizing text…</h3>
             <p>{progress.status}</p>
             <div
               className="progress-track"
@@ -93,27 +93,13 @@ export default function OcrOutputPanel() {
             spellCheck={false}
             value={comparingRegion ? regionTexts[activeRegion!] : text}
             onChange={(e) => comparingRegion ? editRegionText(activeRegion!, e.target.value) : setText(e.target.value)}
-            placeholder="No text found. Try another language, a clearer image, or the Scattered text layout in Settings."
+            placeholder="No text found. Try another language, a clearer image, or the Scattered text layout in OCR settings."
           />
         ) : (
           <div className="output-placeholder">
-            <div className="empty-text-icon">
-              <FileText size={29} strokeWidth={1.25} />
-              <span>
-                <Check size={11} strokeWidth={3} />
-              </span>
-            </div>
-            <h3>Your words, right here.</h3>
-            <p>
-              Add an image and extract its text.
-              <br />
-              Then edit, copy, or take it with you.
-            </p>
-            <div className="placeholder-lines" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
+            <FileText size={28} strokeWidth={1.5} aria-hidden="true" />
+            <h3>No text yet</h3>
+            <p>Add an image, then extract its text to edit, copy, or export it.</p>
           </div>
         )}
       </div>
@@ -131,7 +117,7 @@ export default function OcrOutputPanel() {
               {result.duration.toFixed(1)}s
             </>
           ) : (
-            "Ready when you are"
+            "Ready"
           )}
         </span>
       </div>
@@ -142,7 +128,7 @@ export default function OcrOutputPanel() {
           onClick={() => void copy()}
         >
           {copied ? <Check size={15} /> : <Copy size={15} />}
-          {copied ? "Copied!" : comparingRegion ? "Copy all text" : "Copy text"}
+          {copied ? "Copied" : comparingRegion ? "Copy all text" : "Copy text"}
         </button>
         <button
           className="text-button"

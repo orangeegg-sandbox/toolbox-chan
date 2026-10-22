@@ -1,0 +1,162 @@
+{
+  "character": "Toolbox-Chan — Mint Pocket Helper",
+  "selected_concept": "D",
+  "generator": "Built-in image_gen",
+  "date": "2026-10-20",
+  "status": "Reviewed character artwork; application integration is not part of this revision.",
+  "files": [
+    {
+      "file": "01-turnaround.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "contents": [
+        "Equipped full body",
+        "Front",
+        "Right side",
+        "Back",
+        "Case-body strap mount closeup",
+        "Palette"
+      ]
+    },
+    {
+      "file": "02-faces-emotes.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "contents": [
+        "Front",
+        "Right three-quarter",
+        "Right profile",
+        "Left three-quarter",
+        "Welcome",
+        "Thinking",
+        "Eureka",
+        "Reassure",
+        "Concerned",
+        "Focused",
+        "Sorry",
+        "Proud"
+      ]
+    },
+    {
+      "file": "03-full-body.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "transparent": true
+    },
+    {
+      "file": "04-pixel-head-icon.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "kind": "Pixel-style head artwork; platform icon sizes have not been exported."
+    },
+    {
+      "file": "05-sidebar-peek.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "transparent": true,
+      "kind": "Peeks in from the right edge; used faded in the sidebar."
+    },
+    {
+      "file": "06-palette-peek.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "transparent": true,
+      "kind": "Peeks over a bottom edge; used above the command palette."
+    }
+  ],
+  "canonical_placement": {
+    "toolbox": "Character's right hip",
+    "strap": "Character's left shoulder to right-hip case. Front image upper right to lower left; rear image upper left to lower right.",
+    "mount": "D-ring on reinforced tab riveted to case body below lid seam, not on lid",
+    "magnifier": "Character's right hand",
+    "books_and_yellow_notebook": "Character's left arm",
+    "chest_pens_and_note": "Character's right chest",
+    "yellow_headband_note": "Character's left; occluded in right profile",
+    "mint_fringe_mark": "Character's right"
+  },
+  "visual_review": {
+    "reviewers": 2,
+    "result": "No material visible placement defect found in the final artwork at the delivered resolution.",
+    "checked": [
+      "Strap direction across front and back views",
+      "Visible case-body attachment below rim",
+      "Right-side toolbox consistency",
+      "Magnifier grip and supported books",
+      "Chest stationery restored after repair",
+      "Head landmark side consistency and profile occlusion",
+      "Opposing three-quarter face angles",
+      "Distinct Thinking and Focused expressions",
+      "Pixel head identity and feature placement"
+    ],
+    "limits": [
+      "Review covers visible illustrated geometry, not hidden mechanical construction.",
+      "Pixel-style design is not a guaranteed exact 64-by-64 pixel grid."
+    ],
+    "corrections": [
+      "Reversed faulty chest diagonals",
+      "Removed dangling strap ends",
+      "Moved clasp from apparent lid attachment to body-mounted riveted tab",
+      "Restored chest stationery",
+      "Removed far-side headband note from right profile",
+      "Corrected duplicate face angle",
+      "Clarified facial expressions"
+    ]
+  },
+  "alpha_checks": {
+    "method": "Read PNG alpha values with System.Drawing; source pixels were not modified.",
+    "full_body_zero_alpha_samples": [
+      [
+        0,
+        0
+      ],
+      [
+        350,
+        20
+      ],
+      [
+        280,
+        80
+      ],
+      [
+        120,
+        500
+      ],
+      [
+        150,
+        610
+      ],
+      [
+        900,
+        750
+      ],
+      [
+        480,
+        1380
+      ],
+      [
+        500,
+        1450
+      ]
+    ],
+    "full_body_foreground_sample": {
+      "x": 400,
+      "y": 550,
+      "alpha": 253
+    },
+    "pixel_icon_corner_alpha": 0,
+    "note": "The image tool preview exposes smoky RGB colors underneath fully transparent pixels. Sampled background pixels have alpha zero."
+  }
+}

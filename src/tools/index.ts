@@ -1,4 +1,4 @@
-import type { ToolDefinition } from "../core/tools/contracts";
+import type { ToolDefinition } from "../core/sdk";
 import { ocrTool } from "./ocr";
 
 // Register another module here; the core discovers its navigation and surfaces.

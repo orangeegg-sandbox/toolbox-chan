@@ -1,29 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   ChevronDown,
   CircleHelp,
   Cloud,
+  Lightbulb,
   Maximize2,
   Minimize2,
+  Settings2,
   ShieldCheck,
-  Sparkles,
-  WandSparkles,
   X,
 } from "lucide-react";
 import { Engine } from "../types";
 import { modes } from "../constants";
 import { errorMessage } from "../utils";
-import type { ToolSurfaceProps } from "../../../core/tools/contracts";
-import { ToolPage, SplitPane } from "../../../core/layout";
+import { ToolPage, SplitPane, type ToolSurfaceProps } from "../../../core/sdk";
 import OcrInputPanel from "./OcrInputPanel";
 import OcrOutputPanel from "./OcrOutputPanel";
+import OcrSettings from "./OcrSettings";
 import { sampleImage } from "../services/images";
 import { useOcr } from "../OcrProvider";
 export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
   const [expanded, setExpanded] = useState(false);
   const comparison = useRef<HTMLDivElement>(null);
   const expandButton = useRef<HTMLButtonElement>(null);
+  const settingsPanel = useRef<HTMLElement>(null);
+  const settingsButton = useRef<HTMLButtonElement>(null);
   const {
     source,
     text,
@@ -35,12 +38,28 @@ export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
     setError,
     fileInput,
     notify,
-    openSettings,
+    settingsOpen,
+    setSettingsOpen,
+    openOcrSettings,
     loadFile,
     changeMode,
     changeEngine,
     drop,
   } = useOcr();
+  useEffect(() => {
+    if (!settingsOpen) return;
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    settingsPanel.current?.focus({ preventScroll: true });
+    settingsPanel.current?.scrollIntoView({ block: "start" });
+  }, [settingsOpen, expanded]);
+  const closeSettings = () => {
+    setSettingsOpen(false);
+    settingsButton.current?.focus({ preventScroll: true });
+    settingsButton.current?.scrollIntoView({ block: "nearest" });
+  };
   useEffect(() => {
     if (!expanded) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -101,20 +120,32 @@ export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
               </button>
             ))}
           </div>
-          <div className="engine-picker">
-            <span>Engine</span>
-            <div className="select-wrap compact">
-              <select
-                aria-label="OCR engine"
-                value={engine}
-                disabled={busy}
-                onChange={(e) => changeEngine(e.target.value as Engine)}
-              >
-                <option value="offline">Offline · Tesseract</option>
-                <option value="online">Online · Vision API</option>
-              </select>
-              <ChevronDown size={13} />
+          <div className="ocr-toolbar-actions">
+            <div className="engine-picker">
+              <span>Engine</span>
+              <div className="select-wrap compact">
+                <select
+                  aria-label="OCR engine"
+                  value={engine}
+                  disabled={busy}
+                  onChange={(e) => changeEngine(e.target.value as Engine)}
+                >
+                  <option value="offline">Offline · Tesseract</option>
+                  <option value="online">Online · Vision API</option>
+                </select>
+                <ChevronDown size={13} />
+              </div>
             </div>
+            <button
+              ref={settingsButton}
+              className={`button secondary ocr-settings-button ${settingsOpen ? "selected" : ""}`}
+              aria-expanded={settingsOpen}
+              aria-controls="ocr-settings-panel"
+              onClick={() => settingsOpen ? closeSettings() : openOcrSettings()}
+            >
+              <Settings2 size={15} />
+              OCR settings
+            </button>
           </div>
         </div>
       }
@@ -130,18 +161,18 @@ export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
               <Cloud size={12} />
               {mode === "custom" ? "Only highlighted crops" : "Your image"} will
               be sent to your configured provider.{" "}
-              <button onClick={() => openSettings()}>Configure</button>
+              <button onClick={openOcrSettings}>Configure</button>
             </span>
           )}
         </div>
       }
-      footer={
+      footer={!settingsOpen &&
         <div className="under-workspace">
           <span>
             <ShieldCheck size={14} />
             {engine === "offline"
-              ? "Your images stay on your device. Always."
-              : "Online OCR uses your provider’s data policy."}
+              ? "Images are processed on this device."
+              : "Online OCR follows your provider’s data policy."}
           </span>
           <button
             className="text-button sample-button"
@@ -154,25 +185,19 @@ export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
               }
             }}
           >
-            <Sparkles size={14} />
             Try a sample image
             <ArrowRight size={13} />
           </button>
         </div>
       }
-      hint={
-        <div className="tips-row">
-          <div className="tip-icon">
-            <WandSparkles size={20} strokeWidth={1.5} />
-          </div>
-          <div>
-            <strong>A small tip for better results</strong>
-            <p>
-              Sharp images and upright text work best. Choose the matching
-              language, or highlight just the text you need.
-            </p>
-          </div>
-        </div>
+      hint={!settingsOpen &&
+        <p className="tips-row">
+          <Lightbulb size={14} aria-hidden="true" />
+          <span>
+            Sharp images and upright text work best. Choose the matching
+            language, or highlight only the text you need.
+          </span>
+        </p>
       }
     >
       <input
@@ -187,8 +212,33 @@ export default function OcrWorkspace({ tool }: ToolSurfaceProps) {
           event.target.value = "";
         }}
       />
+      {settingsOpen && (
+        <section
+          ref={settingsPanel}
+          id="ocr-settings-panel"
+          className="ocr-settings-panel"
+          aria-labelledby="ocr-settings-heading"
+          tabIndex={-1}
+        >
+          <div className="ocr-settings-heading">
+            <div>
+              <div className="ocr-settings-title">
+                <Settings2 size={19} />
+                <h2 id="ocr-settings-heading">OCR settings</h2>
+              </div>
+              <p>Recognition, your online provider, and local history. Changes apply to OCR only.</p>
+            </div>
+            <button className="button secondary" onClick={closeSettings}>
+              <ArrowLeft size={15} />
+              Back to workspace
+            </button>
+          </div>
+          <OcrSettings />
+        </section>
+      )}
       <div
         ref={comparison}
+        hidden={settingsOpen}
         className={`ocr-comparison ${expanded ? "is-expanded" : ""}`}
         role={expanded ? "dialog" : "region"}
         aria-modal={expanded ? true : undefined}

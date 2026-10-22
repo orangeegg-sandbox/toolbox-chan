@@ -7,6 +7,7 @@ export interface ToolboxServices {
   modifier: string;
   navigate: (route: ToolboxRoute) => void;
   openTool: (id: string) => void;
+  /** Opens global app preferences. Tool settings belong inside the tool page. */
   openSettings: () => void;
   notify: (message: string, isError?: boolean) => void;
 }

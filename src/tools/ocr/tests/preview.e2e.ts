@@ -123,10 +123,10 @@ test("regions keep source coordinates and crop dimensions through zoom, resize, 
     });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "OCR settings", exact: true }).click();
   await page.getByLabel("API base URL").fill("https://preview.example/v1");
   await page.getByLabel("Vision model", { exact: true }).fill("preview-test");
-  await page.getByRole("button", { name: "Image to text", exact: true }).click();
+  await page.getByRole("button", { name: "Back to workspace", exact: true }).click();
   await loadWideScreenshot(page);
   await page.getByLabel("OCR engine").selectOption("online");
   await page.getByRole("tab", { name: "Custom", exact: true }).click();

@@ -1,4 +1,4 @@
-# Little Toolbox
+# Toolbox-Chan
 
 Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 
@@ -10,8 +10,9 @@ Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 - `scripts/` runs builds; `public/tools/`, `dist/`, `release/`, and `src-tauri/target/` contain generated output.
 
 ## Working rules
-- Keep tool logic inside its module; core must not import tool implementations, and tools must not import sibling tools.
+- Keep tool logic inside its module; core must not import tool implementations, tools import core only through `src/core/sdk.ts`, and tools must not import sibling tools.
 - Use core layout components and register new tools through their `ToolDefinition` manifest.
+- Follow `docs/design-system.md` for UI: use the tokens in `src/core/appearance/theme.css`, never raw colors or pixel font sizes.
 - Keep instructions scoped and concise; put implementation detail in `docs/architecture.md` or module READMEs. Do not hand-edit generated output.
 - Relevant checks: `npm run check`, `npm run test:e2e`, and `npm run check:native` for Rust changes.
 
@@ -24,3 +25,6 @@ Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 <!-- codebase-memory-mcp:start -->
 For structural codebase exploration, use the installed `codebase-memory` skill.
 <!-- codebase-memory-mcp:end -->
+
+## Other agents
+This project uses tower (rules in TOWER.md). Before a large task, or a subtask you could hand off, use the `tower` skill.

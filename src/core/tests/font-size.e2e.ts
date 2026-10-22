@@ -15,12 +15,12 @@ test("font size updates the app and preview, preserves tool state, and survives 
   const preview = page.getByRole("group", { name: "Font size preview" });
   const previewHeading = preview.getByRole("heading");
   await expect(select).toHaveValue("125");
-  await expect(previewHeading).toHaveCSS("font-size", "21.25px");
+  await expect(previewHeading).toHaveCSS("font-size", "20px");
 
   await select.selectOption("175");
   await expect(page.locator("html")).toHaveAttribute("data-ui-font-size", "175");
   await expect(preview).toContainText("Extra large · 175%");
-  await expect(previewHeading).toHaveCSS("font-size", "29.75px");
+  await expect(previewHeading).toHaveCSS("font-size", "28px");
   expect(
     await page.evaluate(() =>
       document.documentElement.style.getPropertyValue("--ui-font-scale"),

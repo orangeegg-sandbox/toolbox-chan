@@ -24,7 +24,7 @@ export function ToolPage({
     <section {...props} aria-label={`${tool.name} workspace`}>
       <div className="page-heading">
         <div className="heading-icon">
-          <Icon size={27} strokeWidth={1.7} />
+          <Icon size={20} strokeWidth={1.75} />
         </div>
         <div>
           <div className="heading-title">
@@ -33,7 +33,6 @@ export function ToolPage({
           </div>
           {tool.subtitle && <p>{tool.subtitle}</p>}
         </div>
-        <span className="tool-category">{tool.category.toUpperCase()}</span>
       </div>
       {toolbar}
       {description}

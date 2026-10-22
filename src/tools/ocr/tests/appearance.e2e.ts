@@ -65,16 +65,6 @@ test("appearance changes preserve OCR results and actual image dimensions", asyn
   }
 });
 
-test("dark appearance and larger-text examples are visible together", async ({ page }) => {
-  await page.setViewportSize({ width: 1600, height: 1100 });
-  await page.goto("/");
-  await settings(page);
-  await page.getByLabel("Color theme", { exact: true }).selectOption("dark");
-  await page.getByLabel("Font size", { exact: true }).selectOption("125");
-  await expect(page.getByRole("group", { name: "Font size preview" })).toBeVisible();
-  await page.screenshot({ path: "test-results/ui-settings-dark.png", fullPage: false, animations: "disabled" });
-});
-
 test("expanded OCR displays errors and can be restored after removing its image", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Try a sample image" }).click();

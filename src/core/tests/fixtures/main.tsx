@@ -8,8 +8,15 @@ import {
 import { createRoot } from "react-dom/client";
 import { Calculator, FileText } from "lucide-react";
 import { ToolboxApp } from "../../ToolboxApp";
-import { ToolPage, ToolPanel } from "../../layout";
-import type { ToolDefinition, ToolSurfaceProps } from "../../tools/contracts";
+// Fixture tools use the same SDK entry point as production tools.
+import {
+  ToolCommandHandler,
+  ToolPage,
+  ToolPanel,
+  useToolCommands,
+  type ToolDefinition,
+  type ToolSurfaceProps,
+} from "../../sdk";
 
 const CounterContext = createContext<{
   count: number;
@@ -42,6 +49,9 @@ function CounterWorkspace({ tool }: ToolSurfaceProps) {
           Increment counter
         </button>
       </ToolPanel>
+      <ToolPanel title="Counter settings">
+        <CounterSettings />
+      </ToolPanel>
     </ToolPage>
   );
 }
@@ -57,6 +67,27 @@ function CounterSettings() {
       />
     </label>
   );
+}
+type CounterCommandState = { increment: () => void };
+class CounterCommandHandler extends ToolCommandHandler<CounterCommandState, "increment"> {
+  protected readonly definitions = [
+    {
+      id: "counter.increment",
+      name: "Increment counter",
+      description: "Add the current step to the counter",
+      keywords: ["plus"],
+      action: "increment" as const,
+    },
+  ];
+  protected readonly actions = {
+    increment: (state: CounterCommandState) => state.increment(),
+  };
+}
+const counterCommandHandler = new CounterCommandHandler();
+function CounterCommands() {
+  const state = useContext(CounterContext);
+  useToolCommands(counterCommandHandler, state);
+  return null;
 }
 const NotesContext = createContext<{
   text: string;
@@ -89,17 +120,19 @@ const tools: ToolDefinition[] = [
     id: "counter",
     name: "Counter fixture",
     description: "A different tool",
+    keywords: ["tally"],
     category: "Fixtures",
     icon: Calculator,
     Provider: CounterProvider,
     Workspace: CounterWorkspace,
-    Settings: CounterSettings,
+    Commands: CounterCommands,
     Activity: () => <p>Counter activity contribution.</p>,
   },
   {
     id: "notes",
     name: "Notes fixture",
     description: "Another independent tool",
+    keywords: ["scratchpad"],
     category: "Fixtures",
     icon: FileText,
     Provider: NotesProvider,

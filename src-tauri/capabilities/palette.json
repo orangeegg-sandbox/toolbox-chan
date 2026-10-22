@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "palette-capability",
+  "description": "The floating command palette reads display metadata, forwards a chosen command, and hides itself.",
+  "windows": ["command-palette"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-palette-get-snapshot",
+    "allow-palette-execute",
+    "allow-palette-hide"
+  ]
+}

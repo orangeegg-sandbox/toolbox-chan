@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "ocr-capability",
+  "description": "OCR in the toolbox window: explicitly requested image paste and online recognition.",
+  "windows": ["main"],
+  "permissions": [
+    "clipboard-manager:allow-read-image",
+    "allow-online-ocr",
+    "allow-cancel-online-ocr"
+  ]
+}

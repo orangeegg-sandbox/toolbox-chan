@@ -89,6 +89,8 @@ const child = spawn(
         "--manifest-path",
         join(root, "src-tauri", "Cargo.toml"),
         "--lib",
+        "--test",
+        "*",
       ]
     : [
         join(root, "node_modules", "@tauri-apps", "cli", "tauri.js"),

@@ -8,15 +8,14 @@ export function ThemeSettings() {
   return (
     <section className="settings-card theme-settings" aria-label="Appearance">
       <div className="settings-section-heading">
-        <Palette size={19} aria-hidden="true" />
+        <Palette size={16} aria-hidden="true" />
         <h2>Appearance</h2>
-        <span className="small-tag">APP-WIDE</span>
       </div>
       <div className="setting-row">
         <div>
           <label htmlFor="color-theme">Color theme</label>
           <p id="color-theme-description">
-            Switch themes, or follow your device’s appearance.
+            Light or dark. System follows your device setting.
           </p>
         </div>
         <div className="select-wrap">
@@ -37,16 +36,11 @@ export function ThemeSettings() {
         </div>
       </div>
       <div className="settings-note theme-status" role="status">
-        <CurrentIcon size={15} aria-hidden="true" />
+        <CurrentIcon size={14} aria-hidden="true" />
         <span>
           {preference === "system" ? "Following your system" : "Applied across your toolbox"}
           {" · "}
           {theme === "dark" ? "Dark appearance" : "Light appearance"}
-        </span>
-        <span className="theme-swatches" aria-hidden="true">
-          <span />
-          <span />
-          <span />
         </span>
       </div>
     </section>

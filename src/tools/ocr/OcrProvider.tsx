@@ -8,12 +8,11 @@ import {
   type PropsWithChildren,
   type DragEvent,
 } from "react";
-import { useToolbox } from "../../core/ToolboxContext";
+import { copyText, exportText, useToolbox } from "../../core/sdk";
 import { cropImage, prepareImage, readImage } from "./services/images";
 import { OcrCancelled, OcrEngine, type OcrProgress } from "./services/offline";
 import { recognizeOnline, validateEndpoint } from "./services/online";
 import { clipboardImage } from "./services/clipboard";
-import { copyText, exportText } from "../../core/platform/text";
 import {
   clearStoredHistory,
   loadHistory,
@@ -33,9 +32,14 @@ import type {
 } from "./types";
 import { errorMessage } from "./utils";
 function useOcrController() {
-  const { route, modifier, notify, openTool, openSettings } = useToolbox();
+  const { route, modifier, notify, openTool } = useToolbox();
   const active = route.page === "tool" && route.toolId === "ocr";
   const [preferences, setPreferences] = useState(loadPreferences);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const openOcrSettings = () => {
+    openTool("ocr");
+    setSettingsOpen(true);
+  };
   const [history, setHistory] = useState(loadHistory);
   const [source, setSource] = useState<SourceImage | null>(null);
   const [mode, setMode] = useState<OcrMode>("simple");
@@ -128,6 +132,7 @@ function useOcrController() {
         setActiveRegion(null);
         setRegionTexts([]);
         setResult(null);
+        setSettingsOpen(false);
         openTool("ocr");
       } catch (failure) {
         if (token === imageLoad.current) setError(errorMessage(failure));
@@ -188,7 +193,7 @@ function useOcrController() {
         validateEndpoint(online.endpoint);
         if (!online.model.trim())
           throw new Error(
-            "Add your online OCR model and API key in Settings first.",
+            "Add your online OCR model in OCR settings first.",
           );
       } catch (failure) {
         setError(errorMessage(failure));
@@ -346,6 +351,7 @@ function useOcrController() {
       name: entry.name,
     });
     setError("");
+    setSettingsOpen(false);
     openTool("ocr");
   };
   const removeHistory = (id?: string) => {
@@ -376,6 +382,7 @@ function useOcrController() {
   useEffect(() => {
     if (!active) return;
     const paste = (event: ClipboardEvent) => {
+      if (document.querySelector("dialog[open]")) return;
       const item = Array.from(event.clipboardData?.items ?? []).find(
         (i) => i.kind === "file" && i.type.startsWith("image/"),
       );
@@ -438,6 +445,9 @@ function useOcrController() {
   };
   return {
     preferences,
+    settingsOpen,
+    setSettingsOpen,
+    openOcrSettings,
     history,
     source,
     setSource,
@@ -469,7 +479,6 @@ function useOcrController() {
     modifier,
     notify,
     openTool,
-    openSettings,
     updatePreferences,
     loadFile,
     pasteImage,

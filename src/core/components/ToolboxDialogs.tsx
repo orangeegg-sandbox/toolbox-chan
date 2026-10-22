@@ -1,58 +1,25 @@
 import {
-  ArrowRight,
-  History,
   Keyboard,
-  LayoutGrid,
-  Search,
-  Settings2,
   X,
 } from "lucide-react";
-import { useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import { useToolbox } from "../ToolboxContext";
-import type { ToolDefinition, ToolboxRoute } from "../tools/contracts";
+import type { ToolDefinition } from "../tools/contracts";
+import { usePaletteShortcut } from "../commands/ShortcutProvider";
 
 export function ToolboxDialogs({
   help,
-  palette,
   activeTool,
 }: {
   help: RefObject<HTMLDialogElement | null>;
-  palette: RefObject<HTMLDialogElement | null>;
   activeTool?: ToolDefinition;
 }) {
-  const { tools, navigate, modifier } = useToolbox();
-  const [search, setSearch] = useState("");
-  const commands = [
-    ...tools.map((tool) => ({
-      id: `tool:${tool.id}`,
-      name: tool.name,
-      icon: tool.icon,
-      route: { page: "tool", toolId: tool.id } as ToolboxRoute,
-    })),
-    {
-      id: "tools",
-      name: "All tools",
-      icon: LayoutGrid,
-      route: { page: "tools" } as ToolboxRoute,
-    },
-    {
-      id: "history",
-      name: "Recent activity",
-      icon: History,
-      route: { page: "history" } as ToolboxRoute,
-    },
-    {
-      id: "settings",
-      name: "Settings",
-      icon: Settings2,
-      route: { page: "settings" } as ToolboxRoute,
-    },
-  ].filter((command) =>
-    command.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const { modifier } = useToolbox();
+  const { shortcutLabel } = usePaletteShortcut();
   const shortcuts = [
     ...(activeTool?.shortcuts ?? []),
-    { label: "Find a tool", keys: ["Mod", "K"] },
+    { label: "Open command palette", keys: [shortcutLabel] },
+    { label: "Open command palette (in app)", keys: ["Mod", "K"] },
     { label: "Close this dialog", keys: ["Esc"] },
   ];
   return (
@@ -60,8 +27,8 @@ export function ToolboxDialogs({
       <dialog className="help-dialog" ref={help}>
         <div className="dialog-heading">
           <div>
-            <Keyboard size={21} />
-            <h2>A few handy shortcuts</h2>
+            <Keyboard size={18} />
+            <h2>Keyboard shortcuts</h2>
           </div>
           <button
             className="icon-button"
@@ -74,7 +41,7 @@ export function ToolboxDialogs({
         <p>
           {activeTool
             ? `${activeTool.name} and toolbox shortcuts.`
-            : "Small shortcuts for your everyday workflow."}
+            : "Toolbox shortcuts."}
         </p>
         <div className="shortcut-list">
           {shortcuts.map((shortcut) => (
@@ -87,45 +54,6 @@ export function ToolboxDialogs({
               </kbd>
             </div>
           ))}
-        </div>
-      </dialog>
-      <dialog
-        className="command-dialog"
-        ref={palette}
-        onClose={() => setSearch("")}
-      >
-        <div className="command-input">
-          <Search size={19} />
-          <input
-            aria-label="Find a tool"
-            placeholder="Find a tool or go somewhere…"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            autoFocus
-          />
-          <button
-            className="icon-button"
-            aria-label="Close search"
-            onClick={() => palette.current?.close()}
-          >
-            <X size={17} />
-          </button>
-        </div>
-        <div className="command-results">
-          {commands.map((command) => (
-            <button
-              key={command.id}
-              onClick={() => {
-                navigate(command.route);
-                palette.current?.close();
-              }}
-            >
-              <command.icon size={18} />
-              <span>{command.name}</span>
-              <ArrowRight size={15} />
-            </button>
-          ))}
-          {!commands.length && <p>No tools found. Try another name.</p>}
         </div>
       </dialog>
     </>

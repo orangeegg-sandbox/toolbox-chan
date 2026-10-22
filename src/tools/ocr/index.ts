@@ -1,8 +1,9 @@
 import { lazy } from "react";
 import { ScanLine } from "lucide-react";
-import type { ToolDefinition } from "../../core/tools/contracts";
+import type { ToolDefinition } from "../../core/sdk";
 import { OcrProvider } from "./OcrProvider";
 import { OcrStatus } from "./components/OcrStatus";
+import { OcrCommands } from "./OcrCommands";
 import "./ocr.css";
 
 export const ocrTool = {
@@ -10,13 +11,14 @@ export const ocrTool = {
   name: "Image to text",
   category: "Images & documents",
   description:
-    "Extract, edit, and copy text from any image. All on your device.",
-  subtitle: "Goodbye retyping. Hello, editable text.",
+    "Extract, edit, and copy text from images. Runs offline by default.",
+  subtitle: "Turn images into editable text.",
   badge: "OCR",
   icon: ScanLine,
+  keywords: ["ocr", "recognize", "scan", "image", "extract text"],
+  Commands: OcrCommands,
   Provider: OcrProvider,
   Workspace: lazy(() => import("./components/OcrWorkspace")),
-  Settings: lazy(() => import("./components/OcrSettings")),
   Activity: lazy(() => import("./components/OcrActivity")),
   Status: OcrStatus,
   shortcuts: [

@@ -148,24 +148,72 @@ test("settings, invalid files, and online mode have clear boundaries", async ({
     buffer: Buffer.from("test"),
   });
   await expect(page.getByRole("alert")).toContainText("Choose a PNG");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "OCR settings", exact: true }).click();
   await page.getByLabel("Keep recent activity").uncheck();
   await page.getByLabel("API key").fill("session-only-secret");
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(
     "session-only-secret",
   );
   await page.reload();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "OCR settings", exact: true }).click();
   await expect(page.getByLabel("Keep recent activity")).not.toBeChecked();
   await expect(page.getByLabel("API key")).toHaveValue("");
-  await page
-    .getByRole("button", { name: "Image to text", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Back to workspace", exact: true }).click();
   await page.getByLabel("OCR engine").selectOption("online");
   await expect(page.getByRole("tab", { name: "Overlay" })).toBeDisabled();
   await expect(
     page.getByText("Your image will be sent", { exact: false }),
   ).toBeVisible();
+});
+
+test("global settings stay app-wide and OCR settings preserve the workspace and preferences", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Try a sample image" }).click();
+  await page.getByRole("button", { name: "Extract text", exact: false }).click();
+  const editor = page.getByRole("textbox", { name: "Recognized text", exact: true });
+  await expect(editor).toHaveValue(/A little less busywork/);
+  await editor.fill("My corrected OCR result");
+
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  for (const region of ["Appearance", "Text size", "Command palette"]) {
+    await expect(page.getByRole("region", { name: region, exact: true })).toBeVisible();
+  }
+  await expect(page.getByRole("region", { name: "OCR settings", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Recognition", exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Default language", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("API key", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Keep recent activity", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Image to text", exact: true }).click();
+  const settingsButton = page.getByRole("button", { name: "OCR settings", exact: true });
+  await settingsButton.click();
+  const ocrSettings = page.getByRole("region", { name: "OCR settings", exact: true });
+  await expect(ocrSettings).toBeVisible();
+  await expect(settingsButton).toHaveAttribute("aria-expanded", "true");
+  await ocrSettings.getByLabel("Default language", { exact: true }).selectOption("eng+chi_tra");
+  await ocrSettings.getByLabel("Text layout", { exact: true }).selectOption("sparse");
+  await ocrSettings.getByRole("button", { name: "Clear 1 results", exact: true }).click();
+  await expect(ocrSettings.getByRole("button", { name: "Clear 0 results", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Back to workspace", exact: true }).click();
+  await expect(settingsButton).toHaveAttribute("aria-expanded", "false");
+  await expect(editor).toHaveValue("My corrected OCR result");
+  await expect(page.getByRole("img", { name: "a-little-less-busywork.png", exact: true })).toBeVisible();
+
+  await page.getByLabel("OCR engine", { exact: true }).selectOption("online");
+  await page.getByRole("button", { name: "Configure", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Image to text", exact: true })).toBeVisible();
+  await expect(ocrSettings).toBeVisible();
+  await expect(ocrSettings.getByLabel("API key", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Back to workspace", exact: true }).click();
+  await expect(editor).toHaveValue("My corrected OCR result");
+
+  await page.reload();
+  await page.getByRole("button", { name: "OCR settings", exact: true }).click();
+  await expect(ocrSettings.getByLabel("Default language", { exact: true })).toHaveValue("eng+chi_tra");
+  await expect(ocrSettings.getByLabel("Text layout", { exact: true })).toHaveValue("sparse");
+  await expect(ocrSettings.getByRole("button", { name: "Clear 0 results", exact: true })).toBeDisabled();
 });
 
 test("online OCR uploads only highlighted crops on an explicit run and handles provider errors", async ({
@@ -203,13 +251,11 @@ test("online OCR uploads only highlighted crops on an explicit run and handles p
     },
   );
   await page.goto("/");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "OCR settings", exact: true }).click();
   await page.getByLabel("API base URL").fill("https://vision.example/v1");
   await page.getByLabel("Vision model", { exact: true }).fill("test-vision");
   await page.getByLabel("API key", { exact: true }).fill("test-session-key");
-  await page
-    .getByRole("button", { name: "Image to text", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Back to workspace", exact: true }).click();
   await page.getByRole("button", { name: "Try a sample image" }).click();
   await page.getByLabel("OCR engine").selectOption("online");
   await page.getByRole("tab", { name: "Custom" }).click();
@@ -266,6 +312,8 @@ test("pasted image events feed the same offline OCR workflow", async ({
   page,
 }) => {
   await page.goto("/");
+  // The toolbox loads after the page does; paste only once the workspace is ready, like a user would.
+  await expect(page.getByRole("heading", { name: "Drop an image here" })).toBeVisible();
   await page.evaluate(async () => {
     const canvas = document.createElement("canvas");
     canvas.width = 1100;

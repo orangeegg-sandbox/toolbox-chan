@@ -2,16 +2,15 @@ import {
   ArrowRight,
   ChevronRight,
   FileText,
-  History,
   LockKeyhole,
   Trash2,
 } from "lucide-react";
 import { LANGUAGES } from "../types";
 import { formatTime } from "../utils";
-import type { ToolSurfaceProps } from "../../../core/tools/contracts";
+import { EmptyState, type ToolSurfaceProps } from "../../../core/sdk";
 import { useOcr } from "../OcrProvider";
 export default function OcrActivity({ tool }: ToolSurfaceProps) {
-  const { preferences, history, openTool, restore, removeHistory } = useOcr();
+  const { preferences, history, openTool, openOcrSettings, restore, removeHistory } = useOcr();
   return (
     <div className="ocr-tool">
       <div className="view-heading">
@@ -33,7 +32,7 @@ export default function OcrActivity({ tool }: ToolSurfaceProps) {
       {!preferences.keepHistory && (
         <div className="info-banner">
           <LockKeyhole size={17} />
-          History is turned off. You can enable it in Settings.
+          <span>History is turned off. Enable it in <button className="text-button" onClick={openOcrSettings}>OCR settings</button>.</span>
         </div>
       )}
       {history.length ? (
@@ -71,19 +70,19 @@ export default function OcrActivity({ tool }: ToolSurfaceProps) {
           ))}
         </div>
       ) : (
-        <div className="empty-view">
-          <History size={36} strokeWidth={1.3} />
-          <h2>A fresh start.</h2>
-          <p>
-            Your extracted text will appear here when history is enabled.
-            <br />
-            Images are never saved to history.
-          </p>
-          <button className="button primary" onClick={() => openTool("ocr")}>
-            Extract your first image
-            <ArrowRight size={15} />
-          </button>
-        </div>
+        <EmptyState
+          title="No history yet"
+          mascot
+          action={
+            <button className="button secondary" onClick={() => openTool("ocr")}>
+              Open {tool.name}
+              <ArrowRight size={15} />
+            </button>
+          }
+        >
+          Extracted text appears here when history is on. Images are never
+          saved to history.
+        </EmptyState>
       )}
     </div>
   );
