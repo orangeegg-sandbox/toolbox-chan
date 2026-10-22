@@ -30,6 +30,7 @@ import { createShortcutMatcher } from "./commands/shortcuts";
 import { CommandPalette } from "./components/CommandPalette";
 import { usePaletteCommands } from "./commands/usePaletteCommands";
 import { useDesktopPalette } from "./commands/useDesktopPalette";
+import { subscribePetOpenTool } from "./pet/petEvents";
 import "./styles.css";
 import "./commands/palette.css";
 
@@ -59,6 +60,8 @@ export function ToolboxApp({ tools }: { tools: readonly ToolDefinition[] }) {
     () => navigate({ page: "settings" }),
     [navigate],
   );
+  // A pet badge's action may name a tool; the core opens it without knowing who sent it.
+  useEffect(() => subscribePetOpenTool(openTool), [openTool]);
   const modifier = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
   const services = useMemo(
     () => ({

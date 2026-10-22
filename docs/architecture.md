@@ -17,6 +17,7 @@ src/
     layout/                    # ToolPage, SplitPane, ToolPanel, EmptyState
     pages/                     # Tool library, global settings, tool activity host
     commands/                  # Shared command handler contract, registry, native bridge
+    pet/                       # Pet event API: contract, validation, browser-preview hub
     platform/                  # Shared clipboard text and native text export
     tools/                     # ToolDefinition contract and registry
     tests/                     # Registry, dependency boundaries, two-tool fixture integration
@@ -43,6 +44,9 @@ src-tauri/
   src/lib.rs                   # Native composition root; explicit command registration
   src/platform/text_export.rs  # Shared save dialog and text export
   src/platform/palette_*.rs    # Global palette shortcut and floating palette window
+  src/platform/pet_events.rs   # Pet event API hub: validation, badges, forwarding to windows
+  src/platform/pet_door.rs     # Loopback HTTP door to the pet event API for outside programs
+  src/platform/tray.rs         # Tray icon, hide-on-close, start with the system
   src/tools/ocr/online.rs      # OCR HTTP requests, cancellation, endpoint validation
   tests/command_acl.rs         # Each window reaches only its granted commands
 
@@ -162,7 +166,7 @@ The core command palette builds navigation results from the registry and actions
 
 `ShortcutProvider` persists the palette shortcut independently of tool preferences. Browser/non-Windows input uses a local matcher; Windows uses `platform/palette_shortcut.rs`, with a pass-through low-level hook for the default modifier gesture and `RegisterHotKey` for custom chords. Shortcut recording temporarily suspends the native trigger. Global activation opens a separate topmost `command-palette` webview through `platform/palette_window.rs`; it leaves the main window minimized and does not launch an app that has exited.
 
-The floating entry `index.html#command-palette` renders only the shared palette view and appearance providers. `App.tsx` loads the toolbox and tool registry lazily, so the popup never downloads tool modules. `useDesktopPalette` publishes serializable command metadata to a native cache, and the floating window subscribes before reading it. It forwards a selected ID through `palette_execute`; native code checks the sender and cached availability, restores main, and emits `palette-execute`. The main window rechecks the live command and runs its current callback. Tool providers are never duplicated in the popup. Escape, loss of focus, and closing the popup hide it for reuse; closing main still exits the app.
+The floating entry `index.html#command-palette` renders only the shared palette view and appearance providers. `App.tsx` loads the toolbox and tool registry lazily, so the popup never downloads tool modules. `useDesktopPalette` publishes serializable command metadata to a native cache, and the floating window subscribes before reading it. It forwards a selected ID through `palette_execute`; native code checks the sender and cached availability, restores main, and emits `palette-execute`. The main window rechecks the live command and runs its current callback. Tool providers are never duplicated in the popup. Escape, loss of focus, and closing the popup hide it for reuse. Closing main hides it to the tray; **Quit Toolbox-Chan** in the tray menu exits.
 
 - The composition root imports the core and tool registry. The core never imports a tool implementation. A tool imports core contracts, layouts, and services only through `src/core/sdk.ts`; everything else in core is private to the shell. A tool must not import a sibling tool's private implementation. Keep core text and tests free of specific tool names.
 - Keep tool-specific types, styles, tests, build hooks, persistence, and services in the tool's folder. Put a service in core only when it is genuinely shared, such as text export.
@@ -174,6 +178,25 @@ The floating entry `index.html#command-palette` renders only the shared palette 
 
 These are built-in source modules, not a third-party plugin sandbox. A separate schema-driven layout tree would become useful for user-editable layouts, a visual designer, or an external plugin protocol. For the current toolbox, React composition gives the desired boundary with fewer abstractions. See [React's composition guidance](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children).
 
+## Background running and the pet event API
+
+Toolbox-Chan runs in the system tray (`platform/tray.rs`). Closing the main window hides it, a second launch brings the running toolbox forward, and installed builds start with the system by default (Settings → Startup). A start with the system passes `--autostart` and keeps the window hidden. The main window is created hidden and shown in `setup` for every other launch.
+
+The pet event API is the one way anything talks to the desktop pets. Core owns the contract (`src/core/pet/types.ts`, mirrored in `platform/pet_events.rs`); a pet tool owns the behavior. Events say what happened, such as `status: "done"`, and the pet chooses the motion. Only `emote` requests a motion directly, from a fixed list.
+
+```ts
+import { notifyPet } from "../../core/sdk";
+
+void notifyPet({ source: "example", agent: "claude", badge: { count: 3, action: { type: "open-tool", toolId: "example" } } });
+```
+
+There are two doors to one native hub:
+
+- **Tools** call `notifyPet(event)` from `src/core/sdk.ts`. It never throws; an invalid event or one with nobody listening is dropped with a console warning.
+- **Outside programs** post the same JSON to `http://127.0.0.1:47615/pet/events` with `Content-Type: application/json` (`platform/pet_door.rs`). The door binds to loopback only, refuses requests that carry an `Origin` header or a foreign `Host`, and accepts bodies up to 16 KiB. Its address is also written to `pet-api.json` in the app data folder.
+
+`PetHub` validates every event, keeps the latest badge per agent and source (`badge: null` clears one), and emits `pet-event` to all windows. A pet surface reads `getPetState()` when it starts (visibility, badges, and the door's status), then follows `subscribePetEvents` and `subscribePetVisibility` (the tray's **Show pets** item). When a badge is clicked the pet calls `runPetAction(action)`; for `open-tool`, native code shows the main window and the core opens that tool. In the browser preview a page-local hub applies the same rules, so tool workspaces and tests run without Tauri.
+
 ## Verification
 
-`npm run check` includes command handler dispatch and ID-prefix tests, dependency boundaries (including the SDK-only rule), and registry validation. `npm run test:e2e` includes an independent two-tool fixture: it verifies automatic navigation/search, class-based actions with current state, global-only settings, tool-local preferences, activity contributions, different layouts, and an empty registry. Core tests use only that fixture or mocked data, so they pass without OCR; the fixture tools are not included in production. OCR's own tests, including its palette and appearance integration, live alongside its module. `npm run check:native` tests the OCR native endpoint policy, the floating palette/shortcut services, and the per-window command ACL.
+`npm run check` includes command handler dispatch and ID-prefix tests, dependency boundaries (including the SDK-only rule), registry validation, and the pet event rules and browser-preview hub. `npm run test:e2e` includes an independent two-tool fixture: it verifies automatic navigation/search, class-based actions with current state, global-only settings, tool-local preferences, activity contributions, different layouts, and an empty registry. Core tests use only that fixture or mocked data, so they pass without OCR; the fixture tools are not included in production. OCR's own tests, including its palette and appearance integration, live alongside its module. `npm run check:native` tests the OCR native endpoint policy, the floating palette/shortcut services, the pet event hub and HTTP door, and the per-window command ACL.

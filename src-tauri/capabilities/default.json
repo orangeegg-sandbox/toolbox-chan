@@ -1,14 +1,20 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
-  "description": "Core services for the toolbox window: text copy and export, and the palette shortcut and cache.",
+  "description": "Core services for the toolbox window: text copy and export, the palette shortcut and cache, start with the system, and the pet event API.",
   "windows": ["main"],
   "permissions": [
     "core:default",
     "clipboard-manager:allow-write-text",
+    "autostart:allow-is-enabled",
+    "autostart:allow-enable",
+    "autostart:allow-disable",
     "allow-save-text",
     "allow-set-palette-shortcut",
     "allow-palette-update-snapshot",
-    "allow-palette-show"
+    "allow-palette-show",
+    "allow-pet-notify",
+    "allow-pet-get-state",
+    "allow-pet-run-action"
   ]
 }

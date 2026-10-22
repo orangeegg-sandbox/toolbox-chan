@@ -33,7 +33,10 @@ fn each_window_reaches_only_its_granted_commands() {
         WebviewWindowBuilder::new(&app, label, WebviewUrl::default()).build().unwrap()
     });
     let (main, palette) = (window("main"), window("command-palette"));
-    for command in ["set_palette_shortcut", "palette_update_snapshot", "palette_show", "save_text", "online_ocr", "cancel_online_ocr"] {
+    for command in [
+        "set_palette_shortcut", "palette_update_snapshot", "palette_show", "save_text", "online_ocr", "cancel_online_ocr",
+        "pet_notify", "pet_get_state", "pet_run_action",
+    ] {
         assert!(allowed(&main, command), "main window was denied {command}");
         assert!(!allowed(&palette, command), "palette window reached {command}");
     }

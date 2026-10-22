@@ -1,6 +1,7 @@
 import { ThemeSettings } from "../components/ThemeSettings";
 import { FontSizeSettings } from "../components/FontSizeSettings";
 import { CommandPaletteSettings } from "../components/CommandPaletteSettings";
+import { StartupSettingsIfDesktop } from "../components/StartupSettings";
 
 /** App-wide preferences only. Each tool owns its settings inside its workspace. */
 export function SettingsPage() {
@@ -13,6 +14,7 @@ export function SettingsPage() {
       <ThemeSettings />
       <FontSizeSettings />
       <CommandPaletteSettings />
+      <StartupSettingsIfDesktop />
     </>
   );
 }
