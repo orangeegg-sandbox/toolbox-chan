@@ -10,6 +10,7 @@ src/
   core/
     sdk.ts                      # The only core entry point tools may import
     ToolboxApp.tsx              # Shell, provider lifecycle, current route, notifications
+    ToolWindowApp.tsx           # Host for a tool's own window surface (no shell)
     ToolboxContext.tsx          # Shared navigation and notification services
     appearance/                # Theme and font size providers, design tokens
     assets/                    # Toolbox-Chan artwork
@@ -18,6 +19,7 @@ src/
     pages/                     # Tool library, global settings, tool activity host
     commands/                  # Shared command handler contract, registry, native bridge
     pet/                       # Pet event API: contract, validation, browser-preview hub
+    windows/                   # Tool window addresses (#tool-window/<tool>/<window>)
     platform/                  # Shared clipboard text and native text export
     tools/                     # ToolDefinition contract and registry
     tests/                     # Registry, dependency boundaries, two-tool fixture integration
@@ -37,10 +39,11 @@ src/
       ocr.css                  # OCR styles scoped beneath .ocr-tool
       scripts/prepare-assets.mjs
       tests/                   # OCR unit and integration tests
+    agent-pet/                  # Desktop pets: settings workspace and the pet window surface
 
 src-tauri/
   build.rs                     # App command list; turns on the per-window command ACL
-  capabilities/                # default.json (core, main), palette.json (popup), ocr.json (OCR)
+  capabilities/                # default.json (core, main), palette.json (popup), ocr.json (OCR), agent-pet.json (pets)
   src/lib.rs                   # Native composition root; explicit command registration
   src/platform/text_export.rs  # Shared save dialog and text export
   src/platform/palette_*.rs    # Global palette shortcut and floating palette window
@@ -48,6 +51,7 @@ src-tauri/
   src/platform/pet_door.rs     # Loopback HTTP door to the pet event API for outside programs
   src/platform/tray.rs         # Tray icon, hide-on-close, start with the system
   src/tools/ocr/online.rs      # OCR HTTP requests, cancellation, endpoint validation
+  src/tools/agent-pet/         # Pet window, --pet-hook adapter, agent hook installer, DSH watcher
   tests/command_acl.rs         # Each window reaches only its granted commands
 
 scripts/prepare-tools.mjs       # Discovers optional tool-owned asset preparation scripts
@@ -123,6 +127,7 @@ Optional manifest members:
 | `shortcuts` | Metadata shown in the core help dialog; implement the matching handlers in the tool |
 | `keywords` | Extra search terms for the command palette; the tool ID, badge, category, name, and description are searchable automatically |
 | `Commands` | Lightweight component beneath the retained tool providers; call `useToolCommands(handler, state)` with the tool's command handler class |
+| `windows` | Surfaces shown in the tool's own native windows; see [Tool windows](#tool-windows) |
 | `subtitle`, `badge` | Core page heading metadata |
 
 Use `useToolbox()` for `openTool(id)`, `openSettings()`, `navigate(route)`, `notify(message, isError)`, and the platform keyboard modifier. `openSettings()` opens global preferences. Tools should provide their own action for opening local settings on their workspace. The context also exposes the current route and registered tool metadata. It does not expose another tool's state.
@@ -174,9 +179,25 @@ The floating entry `index.html#command-palette` renders only the shared palette 
 - Input handling belongs to the active tool. OCR's file drop, image paste, and action shortcuts do not intercept other tools' input. Global search remains a core shortcut.
 - Persist serializable tool data, not React nodes. New tools should use their own namespaced storage keys. OCR retains the original release's existing keys so current preferences and history continue working.
 - Tool styles should be scoped to the tool root (OCR uses `:where(.ocr-tool)`). Shared theme and layout styles belong to core.
-- Add native logic under `src-tauri/src/tools/<id>/`. Register commands explicitly in the native composition root and list them in `src-tauri/build.rs`. Listing turns on Tauri's command ACL, so a window can call only the commands granted to it. Grant a tool's commands and plugin permissions in its own `src-tauri/capabilities/<id>.json`, for the `main` window only. Frontend registration does not automatically expose native commands.
+- Add native logic under `src-tauri/src/tools/<id>/`. Register commands explicitly in the native composition root and list them in `src-tauri/build.rs`. Listing turns on Tauri's command ACL, so a window can call only the commands granted to it. Grant a tool's commands and plugin permissions in its own `src-tauri/capabilities/<id>.json`, only to the windows that call them: `main`, or the tool's own windows. Frontend registration does not automatically expose native commands.
 
 These are built-in source modules, not a third-party plugin sandbox. A separate schema-driven layout tree would become useful for user-editable layouts, a visual designer, or an external plugin protocol. For the current toolbox, React composition gives the desired boundary with fewer abstractions. See [React's composition guidance](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children).
+
+## Tool windows
+
+A tool can show a surface outside the toolbox, such as the transparent desktop pet layer. It lists the surface in its manifest, and its native code opens a window at that surface's address:
+
+```tsx
+windows: [{ id: "overlay", Surface: lazy(() => import("./window/Overlay")) }],
+```
+
+```rust
+WebviewWindowBuilder::new(app, "example-overlay", WebviewUrl::App("index.html#tool-window/example/overlay".into()))
+```
+
+`App.tsx` routes `#tool-window/<tool id>/<window id>` (parsed in `core/windows/toolWindow.ts`) to `ToolWindowApp`, which renders only that surface inside the shared theme and text-size providers. The page background is transparent. The toolbox shell, tool providers, palette, and other tools' surfaces are not mounted, so the surface talks to the rest of the app the way any window does: through `sdk.ts` services such as the pet event API, shared preferences in local storage, and its own native commands. An unknown address shows a short message instead of the toolbox. The registry checks that window IDs are lowercase IDs, unique within their tool.
+
+Like the toolbox, a tool window loads lazily, so the floating palette never downloads tool modules. Create the native window in the tool's own native module and grant it only what it needs in the tool's capability file, by window label.
 
 ## Background running and the pet event API
 
@@ -199,4 +220,4 @@ There are two doors to one native hub:
 
 ## Verification
 
-`npm run check` includes command handler dispatch and ID-prefix tests, dependency boundaries (including the SDK-only rule), registry validation, and the pet event rules and browser-preview hub. `npm run test:e2e` includes an independent two-tool fixture: it verifies automatic navigation/search, class-based actions with current state, global-only settings, tool-local preferences, activity contributions, different layouts, and an empty registry. Core tests use only that fixture or mocked data, so they pass without OCR; the fixture tools are not included in production. OCR's own tests, including its palette and appearance integration, live alongside its module. `npm run check:native` tests the OCR native endpoint policy, the floating palette/shortcut services, the pet event hub and HTTP door, and the per-window command ACL.
+`npm run check` includes tool window address and registry tests, command handler dispatch and ID-prefix tests, dependency boundaries (including the SDK-only rule), registry validation, and the pet event rules and browser-preview hub. `npm run test:e2e` includes an independent two-tool fixture: it verifies automatic navigation/search, a tool window rendered alone, class-based actions with current state, global-only settings, tool-local preferences, activity contributions, different layouts, and an empty registry. Core tests use only that fixture or mocked data, so they pass without OCR; the fixture tools are not included in production. OCR's own tests, including its palette and appearance integration, live alongside its module. `npm run check:native` tests the OCR native endpoint policy, the floating palette/shortcut services, the pet event hub and HTTP door, and the per-window command ACL.

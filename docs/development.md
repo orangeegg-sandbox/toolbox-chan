@@ -67,7 +67,7 @@ Tools and outside programs talk to the desktop pets through one API; see [archit
 curl -s -m 2 -H "Content-Type: application/json" -d "{\"source\":\"manual\",\"agent\":\"claude\",\"status\":\"done\",\"note\":\"Hello from curl\"}" http://127.0.0.1:47615/pet/events
 ```
 
-A valid event returns `204`; anything else returns a short plain-text reason.
+A valid event returns `204`; anything else returns a short plain-text reason. The [Agent pets](../src/tools/agent-pet/README.md) tool shows these events as desktop pets.
 
 ## Assets and native tooling
 

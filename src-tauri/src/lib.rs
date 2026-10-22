@@ -4,6 +4,10 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Agent hooks start this executable as a short-lived adapter; it exits before Tauri starts.
+    if let Some(code) = tools::agent_pet::hook_cli::run_if_requested() {
+        std::process::exit(code);
+    }
     tauri::Builder::default()
         // Registered first: a second launch only brings the running toolbox forward.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -20,6 +24,7 @@ pub fn run() {
             platform::tray::install(app.handle())?;
             platform::tray::apply_autostart_default(app.handle());
             platform::pet_door::start(app.handle());
+            tools::agent_pet::install(app.handle())?;
             // The main window starts hidden so a start with Windows stays in the tray.
             if !platform::tray::started_by_autostart() {
                 let _ = platform::tray::show_main(app.handle());
@@ -29,6 +34,8 @@ pub fn run() {
         .manage(platform::palette_window::PaletteWindowState::default())
         .manage(platform::pet_events::PetHub::default())
         .manage(tools::ocr::online::OnlineRequests::default())
+        .manage(tools::agent_pet::window::PetWindowState::default())
+        .manage(tools::agent_pet::dsh_watch::DshWatcher::default())
         .on_window_event(|window, event| {
             if window.label() != platform::tray::MAIN_WINDOW {
                 return;
@@ -56,7 +63,11 @@ pub fn run() {
             platform::pet_events::pet_run_action,
             platform::text_export::save_text,
             tools::ocr::online::online_ocr,
-            tools::ocr::online::cancel_online_ocr
+            tools::ocr::online::cancel_online_ocr,
+            tools::agent_pet::window::agent_pet_set_window,
+            tools::agent_pet::hooks::agent_pet_hooks,
+            tools::agent_pet::hooks::agent_pet_install_hooks,
+            tools::agent_pet::hooks::agent_pet_remove_hooks
         ])
         .run(tauri::generate_context!())
         .expect("error while running Toolbox-Chan");

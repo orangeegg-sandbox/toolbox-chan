@@ -13,6 +13,10 @@ const COMMANDS: &[&str] = &[
     "save_text",
     "online_ocr",
     "cancel_online_ocr",
+    "agent_pet_set_window",
+    "agent_pet_hooks",
+    "agent_pet_install_hooks",
+    "agent_pet_remove_hooks",
 ];
 
 fn main() {

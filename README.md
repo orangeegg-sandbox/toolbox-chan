@@ -9,6 +9,7 @@ The name's **Chan** comes from the affectionate Japanese suffix **ちゃん**, r
 | Tool | Description | Links |
 | --- | --- | --- |
 | 🔎 Image to text (OCR) | Extract, edit, copy, and export English and Chinese text from images. | [Folder](src/tools/ocr/) · [README](src/tools/ocr/README.md) |
+| 🐾 Agent pets | Desktop pets that show when Claude Code, Codex, or DSH is working, done, or needs you. | [Folder](src/tools/agent-pet/) · [README](src/tools/agent-pet/README.md) |
 
 ## More information
 

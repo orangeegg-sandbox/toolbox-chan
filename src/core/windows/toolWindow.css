@@ -1,0 +1,15 @@
+/* A tool window is transparent and never scrolls; its surface paints what it needs. */
+:root[data-surface="tool-window"],
+:root[data-surface="tool-window"] body {
+  background: transparent;
+  overflow: hidden;
+}
+.tool-window-missing {
+  margin: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}

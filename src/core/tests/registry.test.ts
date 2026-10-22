@@ -32,4 +32,20 @@ describe("tool registry", () => {
       "needs a name",
     );
   });
+  it("accepts window surfaces and rejects invalid or repeated window ids", () => {
+    const Surface = () => null;
+    const windows = [{ id: "overlay", Surface }, { id: "mini-view", Surface }];
+    expect(createToolRegistry([{ ...tool("with-windows"), windows }]).get("with-windows")?.windows).toBe(windows);
+    expect(() => createToolRegistry([{ ...tool("bad"), windows: [{ id: "Overlay", Surface }] }])).toThrow(
+      "Invalid window id",
+    );
+    expect(() => createToolRegistry([{ ...tool("twice"), windows: [{ id: "a", Surface }, { id: "a", Surface }] }])).toThrow(
+      "Duplicate window id",
+    );
+    // Window ids are scoped to their tool.
+    expect(() => createToolRegistry([
+      { ...tool("first"), windows: [{ id: "overlay", Surface }] },
+      { ...tool("second"), windows: [{ id: "overlay", Surface }] },
+    ])).not.toThrow();
+  });
 });
