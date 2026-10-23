@@ -80,7 +80,6 @@ A valid event returns `204`. On Windows, `curl -d "..."` passes the text in the 
 ## Limitations
 
 - The pets run in the Windows desktop app. The browser preview shows the settings page, but has no pet window, tray, event door, or hooks.
-- The current pets are **temporary placeholder drawings**. The real sprites are described in [the art brief](../../../docs/design/agent-pets/art-brief.md).
 - A chat that stops without a final event (for example one you interrupt) stays "working" until its next event, or for at most 90 minutes.
 - Pet state lives in memory: restarting Toolbox-Chan forgets running chats and red dots. Badges survive a restart of the pet window, not of the app.
 - DSH detection is a guess from file times: a long step without writes can look finished, and "needs you" is not detected.
@@ -104,12 +103,13 @@ A valid event returns `204`. On Windows, `curl -d "..."` passes the text in the 
 | `window/` | The pet window: events, animation loop, hit testing, drag and click |
 | `model/petModel.ts` | Pet state from events: sessions, done and needs-you notices, counts, badges |
 | `model/motion.ts` | Walking, sleeping, following the cursor, falling and landing |
-| `sprites/` | Frame library, sprite player, and the placeholder art |
+| `sprites/` | Frame library and sprite player |
+| `assets/<agent>/` | Runtime copies of the sprite frames in `docs/design/agent-pets/<agent>/frames/` |
 | `components/` | Settings page and hooks section |
 | `src-tauri/src/tools/agent-pet/` | Pet window, `--pet-hook` adapter, hook installer, DSH watcher |
 | `src-tauri/capabilities/agent-pet.json` | Commands for the pet window and the hooks section |
 
 - The pet window is a core [tool window](../../../docs/architecture.md#tool-windows): `index.html#tool-window/agent-pet/pets`. The native side creates it at startup, covers the work area of the screen the mouse is on, and lets clicks pass through until the page reports the pointer is over a pet.
-- **Real art is a file copy.** Copy `docs/design/agent-pets/<claude|codex|deepseek>/frames/<name>-<n>.png` into `assets/<agent>/` here. Frames are found at build time by name (`idle`, `walk`, `working`, `done`, `needsyou`, `held`, `land`, `sleep`, `happy`, `laugh`, `surprised`); missing animations fall back to similar ones, and an agent without frames keeps the placeholder.
+- **Art.** The sprite frames, contact sheets, prompts, and review notes are in `docs/design/agent-pets/<claude|codex|deepseek>/`; `assets/<agent>/` holds unedited copies of each `frames/` folder. To change art, update the docs folder, then copy the frames over. Frames are found at build time by name (`idle`, `walk`, `working`, `done`, `needsyou`, `held`, `land`, `sleep`, `happy`, `laugh`, `surprised`); a missing animation falls back to a similar one.
 - Open `/src/tools/agent-pet/tests/fixtures/poses.html` in the dev server (`npm run dev`) to see every pose of every pet.
 - Tests: `tests/*.test.ts` (state, motion, frames, settings), `tests/agent-pet.e2e.ts` (pet window and settings against a stand-in Tauri bridge), and Rust tests for the window, adapter, installer, and watcher. The installer tests use temporary copies only.

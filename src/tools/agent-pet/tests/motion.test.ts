@@ -45,6 +45,29 @@ describe("pet motion", () => {
     expect(body.y).toBe(900);
   });
 
+  it("stops beside other pets rather than on top of them", () => {
+    const others = [600, 1000];
+    // A small seeded generator, so the walk is varied but repeatable.
+    let seed = 42;
+    const random = () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed / 2147483648;
+    };
+    const body = createBody(0, world(0));
+    body.x = 800;
+    let now = 0;
+    const stops: number[] = [];
+    for (let step = 0; step < 60 * 120; step++) {
+      now += 1000 / 60;
+      const wasWalking = body.wander.walking;
+      stepBody(body, "idle", world(now, null, { random, others }));
+      if (wasWalking && !body.wander.walking) stops.push(body.x);
+      body.calmSince = now;
+    }
+    expect(stops.length).toBeGreaterThan(3);
+    for (const x of stops) for (const other of others) expect(Math.abs(x - other)).toBeGreaterThanOrEqual(SIZE * 0.75);
+  });
+
   it("stays put for working and needs-you", () => {
     const body = createBody(0, world(0));
     const x = body.x;
@@ -63,6 +86,7 @@ describe("pet motion", () => {
     expect(distance).toBeGreaterThan(SIZE * 0.5);
     expect(body.pose).toBe("done");
     expect(body.facing).toBe(-1);
+    expect(body.y).toBeLessThan(900);
     // Moving the cursor onto the pet does not make it run away.
     const near = { x: body.x, y: body.y - SIZE * 0.45 };
     const before = { x: body.x, y: body.y };
@@ -122,7 +146,7 @@ describe("pet motion", () => {
   it("moves with the window to a smaller screen", () => {
     const body = createBody(2, world(0));
     fitBody(body, { width: 1600, height: 900 }, { width: 800, height: 600, size: SIZE });
-    expect(body.x).toBeLessThanOrEqual(800 - SIZE * 0.3);
+    expect(body.x).toBeLessThanOrEqual(800 - SIZE * 0.4);
     expect(body.y).toBe(600);
   });
 });

@@ -24,6 +24,8 @@ export interface World {
   /** Seconds since the last step. */
   dt: number;
   random: () => number;
+  /** Feet x of the other pets, so a wandering pet stops beside them rather than on top of them. */
+  others?: readonly number[];
 }
 
 export interface Body {
@@ -47,11 +49,14 @@ export interface Body {
 export const SLEEP_AFTER_MS = 3 * 60_000;
 export const EMOTE_MS = 1800;
 export const LAND_MS = 320;
-const WALK_SPEED = 0.45;
+/** Matches the walk cycle's stride at 8 frames per second, so feet do not slide. */
+const WALK_SPEED = 0.32;
 const FOLLOW_SPEED = 3;
 /** Start chasing beyond this distance and stop inside the near one, so the cursor can reach the pet to click it. */
 const FOLLOW_FAR = 1.1;
 const FOLLOW_NEAR = 0.7;
+/** Closest a wandering pet chooses to stop next to another pet. */
+const PERSONAL_SPACE = 0.75;
 const GRAVITY = 18;
 const BOUNCE_MIN = 3;
 const BOUNCE = 0.3;
@@ -66,8 +71,9 @@ export function floorOf(world: Pick<World, "height">) {
   return world.height;
 }
 
+/** The art spans about 0.35 of the frame either side of its centre; keep all of it on screen. */
 function clampX(x: number, world: Pick<World, "width" | "size">) {
-  return clamp(x, world.size * 0.3, world.width - world.size * 0.3);
+  return clamp(x, world.size * 0.4, world.width - world.size * 0.4);
 }
 
 export function createBody(index: number, world: World): Body {
@@ -120,7 +126,8 @@ export function stepBody(body: Body, mood: Mood, world: World) {
     body.x = clampX(body.x, world);
     body.y = clamp(body.y, size * 0.95, floor);
     body.vy = 0;
-    setPose(body, emote ?? (body.chasing ? "walk" : "done"), now);
+    // Walk when following along the ground; cheer while flying to the cursor.
+    setPose(body, emote ?? (body.chasing && body.y >= floor - 0.5 ? "walk" : "done"), now);
     return;
   }
   // Done was cleared, or the cursor is unknown: come back down.
@@ -178,8 +185,13 @@ export function stepBody(body: Body, mood: Mood, world: World) {
   }
   if (now >= wander.until) {
     const reach = Math.min(world.width * 0.3, size * 4);
-    const target = clampX(body.x + (world.random() * 2 - 1) * reach, world);
-    if (world.random() < 0.65 && Math.abs(target - body.x) > size * 0.3) {
+    let target: number | null = null;
+    for (let attempt = 0; attempt < 4 && target === null; attempt++) {
+      const candidate = clampX(body.x + (world.random() * 2 - 1) * reach, world);
+      const crowded = (world.others ?? []).some((x) => Math.abs(x - candidate) < size * PERSONAL_SPACE);
+      if (Math.abs(candidate - body.x) > size * 0.3 && !crowded) target = candidate;
+    }
+    if (target !== null && world.random() < 0.65) {
       wander.walking = true;
       wander.target = target;
     } else {

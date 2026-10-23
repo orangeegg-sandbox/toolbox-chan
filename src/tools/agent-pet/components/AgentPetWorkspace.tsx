@@ -6,7 +6,6 @@ import {
 } from "../../../core/sdk";
 import { PETS } from "../pets";
 import { PET_SIZES, usePetSettings, type PetSize } from "../settings";
-import { hasArt } from "../sprites/library";
 import { SpritePlayer } from "../sprites/SpritePlayer";
 import { HooksSettings } from "./HooksSettings";
 
@@ -44,7 +43,6 @@ function PetsSettings() {
       <div className="settings-section-heading">
         <PawPrint size={16} aria-hidden="true" />
         <h2 id="pets-heading">Pets</h2>
-        {!hasArt && <span className="small-tag">PLACEHOLDER ART</span>}
       </div>
       {PETS.map((pet) => (
         <div className="setting-row" key={pet.agent}>
@@ -174,7 +172,6 @@ function Credits() {
         <ul>
           {PETS.map((pet) => <li key={pet.agent}>{pet.name} ({pet.agentName}) by {pet.artist}</li>)}
         </ul>
-        {!hasArt && <p>The pets use simple placeholder drawings until the sprite frames are added.</p>}
       </div>
     </section>
   );

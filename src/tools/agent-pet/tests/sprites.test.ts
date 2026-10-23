@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { AGENT_IDS } from "../../../core/sdk";
+import { POSES } from "../model/motion";
 import { buildLibrary, frameIndex, resolveFrames } from "../sprites/animations";
+import { frameLibrary } from "../sprites/library";
 import { DEFAULT_SETTINGS, parseSettings } from "../settings";
 
 describe("sprite frames", () => {
@@ -26,6 +29,17 @@ describe("sprite frames", () => {
     expect(resolveFrames(library, "claude", "done")).toEqual({ pose: "happy", frames: ["/happy-1.png"] });
     expect(resolveFrames(library, "claude", "working")).toEqual({ pose: "idle", frames: ["/idle-1.png"] });
     expect(resolveFrames(library, "codex", "idle")).toBeNull();
+  });
+
+  it("ships every animation for every pet, without gaps in the numbering", () => {
+    for (const agent of AGENT_IDS) {
+      for (const pose of POSES) {
+        const frames = frameLibrary[agent][pose] ?? [];
+        expect(frames.length, `${agent} ${pose}`).toBeGreaterThan(0);
+        expect(frames.map((url) => Number(/-(\d+)\.png/.exec(url)?.[1])), `${agent} ${pose}`)
+          .toEqual(frames.map((_, index) => index + 1));
+      }
+    }
   });
 
   it("loops most poses and holds the last landing frame", () => {

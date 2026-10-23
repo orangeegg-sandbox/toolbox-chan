@@ -15,8 +15,7 @@
   pointer-events: none;
   will-change: transform;
 }
-.agent-pet-layer .pet-frame,
-.agent-pet-layer .pet-placeholder {
+.agent-pet-layer .pet-frame {
   position: absolute;
   inset: 0;
   display: block;

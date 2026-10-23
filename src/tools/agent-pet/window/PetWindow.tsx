@@ -141,7 +141,8 @@ export default function PetWindow(_props: ToolSurfaceProps) {
           emotes.current.set(agent, state.emote.serial);
           emoteBody(body, state.emote.name, now);
         }
-        stepBody(body, petView(bookRef.current, agent).mood, world);
+        const others = agents.filter((other) => other !== agent).flatMap((other) => bodies.current.get(other)?.x ?? []);
+        stepBody(body, petView(bookRef.current, agent).mood, { ...world, others });
       });
       // Clicks reach this window only while the cursor is over a pet, a badge, or a pet being dragged.
       const point = cursor.current;

@@ -1,16 +1,15 @@
-// Development-only contact sheet: every pose and frame of every pet, from the
-// real frames where they exist and from the placeholder art otherwise.
+// Development-only contact sheet: every pose and frame of every pet as the app
+// plays it, including fallbacks for missing animations.
 // Open /src/tools/agent-pet/tests/fixtures/poses.html in the dev server.
 import { createRoot } from "react-dom/client";
 import { AGENT_IDS } from "../../../../core/sdk";
 import { POSES } from "../../model/motion";
 import { ANIMATIONS, resolveFrames } from "../../sprites/animations";
 import { frameLibrary } from "../../sprites/library";
-import { PLACEHOLDER_FRAMES } from "../../sprites/PlaceholderPet";
 import { SpritePlayer } from "../../sprites/SpritePlayer";
 
 function frameCount(agent: (typeof AGENT_IDS)[number], pose: (typeof POSES)[number]) {
-  return resolveFrames(frameLibrary, agent, pose)?.frames.length ?? PLACEHOLDER_FRAMES[pose];
+  return resolveFrames(frameLibrary, agent, pose)?.frames.length ?? 0;
 }
 
 createRoot(document.getElementById("root")!).render(
