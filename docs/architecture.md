@@ -203,7 +203,9 @@ Like the toolbox, a tool window loads lazily, so the floating palette never down
 
 Toolbox-Chan runs in the system tray (`platform/tray.rs`). Closing the main window hides it, a second launch brings the running toolbox forward, and installed builds start with the system by default (Settings → Startup). A start with the system passes `--autostart` and keeps the window hidden. The main window is created hidden and shown in `setup` for every other launch.
 
-The pet event API is the one way anything talks to the desktop pets. Core owns the contract (`src/core/pet/types.ts`, mirrored in `platform/pet_events.rs`); a pet tool owns the behavior. Events say what happened, such as `status: "done"`, and the pet chooses the motion. Only `emote` requests a motion directly, from a fixed list.
+The pet event API is the one way anything talks to the desktop pets. Core owns the contract (`src/core/pet/types.ts`, mirrored in `platform/pet_events.rs`); a pet tool owns the behavior. Events say what happened, such as `status: "done"` or `notice: "limit-reset"`, and the pet chooses the motion. Only `emote` requests a motion directly, from a fixed list. `message: { text, action? }` is what the pet says in a chat bubble; clicking the bubble runs its action.
+
+Actions are `open-tool` (show the toolbox and open a tool) and `open-link` (open a chat in an agent's app). An `open-link` URL must use an agent app's scheme (`claude://` or `codex://`) and URL-safe characters only, so no event can make the pets open a web page or a file.
 
 ```ts
 import { notifyPet } from "../../core/sdk";
@@ -216,7 +218,7 @@ There are two doors to one native hub:
 - **Tools** call `notifyPet(event)` from `src/core/sdk.ts`. It never throws; an invalid event or one with nobody listening is dropped with a console warning.
 - **Outside programs** post the same JSON to `http://127.0.0.1:47615/pet/events` with `Content-Type: application/json` (`platform/pet_door.rs`). The door binds to loopback only, refuses requests that carry an `Origin` header or a foreign `Host`, and accepts bodies up to 16 KiB. Its address is also written to `pet-api.json` in the app data folder.
 
-`PetHub` validates every event, keeps the latest badge per agent and source (`badge: null` clears one), and emits `pet-event` to all windows. A pet surface reads `getPetState()` when it starts (visibility, badges, and the door's status), then follows `subscribePetEvents` and `subscribePetVisibility` (the tray's **Show pets** item). When a badge is clicked the pet calls `runPetAction(action)`; for `open-tool`, native code shows the main window and the core opens that tool. In the browser preview a page-local hub applies the same rules, so tool workspaces and tests run without Tauri.
+`PetHub` validates every event, keeps the latest badge per agent and source (`badge: null` clears one), and emits `pet-event` to all windows. A pet surface reads `getPetState()` when it starts (visibility, badges, and the door's status), then follows `subscribePetEvents` and `subscribePetVisibility` (the tray's **Show pets** item). When a badge or bubble is clicked the pet calls `runPetAction(action)`; for `open-tool`, native code shows the main window and the core opens that tool, and for `open-link` it hands the link to the app registered for its scheme. In the browser preview a page-local hub applies the same rules, so tool workspaces and tests run without Tauri.
 
 ## Verification
 

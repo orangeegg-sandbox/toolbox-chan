@@ -32,17 +32,22 @@ fn the_pet_window_reaches_only_the_pet_commands() {
     });
     let (main, pet, palette) = (window("main"), window("agent-pet"), window("command-palette"));
     // Plugin commands fail without arguments whether or not they are granted, so only app commands are checked.
-    for command in ["pet_get_state", "pet_run_action", "agent_pet_set_window"] {
+    for command in ["pet_get_state", "pet_run_action", "agent_pet_set_window", "agent_pet_idle_moves"] {
         assert!(allowed(&pet, command), "pet window was denied {command}");
     }
     for command in [
         "pet_notify", "agent_pet_hooks", "agent_pet_install_hooks", "agent_pet_remove_hooks",
-        "save_text", "online_ocr", "cancel_online_ocr", "palette_execute", "palette_get_snapshot", "palette_show",
+        "agent_pet_import_idle_move", "agent_pet_remove_idle_move", "agent_pet_limits",
+        "agent_pet_install_status_line", "agent_pet_remove_status_line", "save_text", "online_ocr", "cancel_online_ocr", "palette_execute", "palette_get_snapshot", "palette_show",
         "set_palette_shortcut",
     ] {
         assert!(!allowed(&pet, command), "pet window reached {command}");
     }
-    for command in ["agent_pet_hooks", "agent_pet_install_hooks", "agent_pet_remove_hooks"] {
+    for command in [
+        "agent_pet_hooks", "agent_pet_install_hooks", "agent_pet_remove_hooks", "agent_pet_idle_moves",
+        "agent_pet_import_idle_move", "agent_pet_remove_idle_move", "agent_pet_limits",
+        "agent_pet_install_status_line", "agent_pet_remove_status_line",
+    ] {
         assert!(allowed(&main, command), "main window was denied {command}");
         assert!(!allowed(&palette, command), "palette window reached {command}");
     }

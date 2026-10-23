@@ -77,13 +77,17 @@ export async function getPetState(): Promise<PetState> {
   };
 }
 
-/** Runs a badge's action. The core shows the toolbox and opens the tool the action names. */
+/**
+ * Runs a badge's or a message's action. For `open-tool` the core shows the
+ * toolbox and opens that tool; for `open-link` it opens the agent's app.
+ */
 export async function runPetAction(action: PetAction): Promise<void> {
   if (isTauri()) {
     await invoke("pet_run_action", { action });
     return;
   }
   if (action.type === "open-tool") for (const listener of [...local.openTool]) listener(action.toolId);
+  else window.open(action.url, "_blank", "noopener");
 }
 
 /** Core only: the toolbox window opens the tool that a badge action names. */

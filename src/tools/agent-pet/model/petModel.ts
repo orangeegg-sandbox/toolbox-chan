@@ -1,5 +1,5 @@
 import {
-  AGENT_IDS, type AgentId, type PetBadgeEntry, type PetEmote, type PetEvent,
+  AGENT_IDS, type AgentId, type PetAction, type PetBadgeEntry, type PetEmote, type PetEvent,
 } from "../../../core/sdk";
 
 // What the pets know, built only from pet events. Events say what happened;
@@ -16,6 +16,20 @@ export interface SessionState {
   updatedAt: number;
 }
 
+/** What kind of event a bubble came with; it decides how the pet answers. */
+export type BubbleKind = "done" | "needs-you" | "notice" | "reset";
+
+/** The latest message the pet says, shown until the user clicks the pet, the bubble, or its close button. */
+export interface Bubble {
+  text: string;
+  action?: PetAction;
+  kind: BubbleKind;
+  /** The chat it is about, so its answer can clear a needs-you bubble. */
+  sessionId?: string;
+  /** Increases with every new bubble. */
+  serial: number;
+}
+
 export interface AgentState {
   /** Keyed by session ID; events without one share the "" session. */
   sessions: Record<string, SessionState>;
@@ -23,6 +37,9 @@ export interface AgentState {
   note?: string;
   /** Increases with every emote request, so the window plays each one once. */
   emote?: { name: PetEmote; serial: number };
+  bubble?: Bubble;
+  /** The agent's usage limit was reset; stays until the pet is clicked. */
+  reset: boolean;
   /** The last time anything happened to this pet, for waking it up. */
   activeAt: number;
 }
@@ -40,10 +57,17 @@ export const FORGET_MS = 10 * 60_000;
 
 export type Mood = "done" | "needs-you" | "working" | "idle";
 
+/** What wants the user right now, strongest first: a finished chat, a question, then any other message. */
+export type Call = "done" | "needsYou" | "notice";
+
 export interface PetView {
   mood: Mood;
   done: boolean;
   needsYou: boolean;
+  /** What wants the user, if anything; picks how the pet answers. */
+  call: Call | null;
+  reset: boolean;
+  bubble?: Bubble;
   /** Chats of this agent running at once (working or waiting for you). */
   count: number;
   note?: string;
@@ -52,9 +76,16 @@ export interface PetView {
 
 export function createBook(now: number, badges: PetBadgeEntry[] = []): PetBook {
   return {
-    agents: Object.fromEntries(AGENT_IDS.map((agent) => [agent, { sessions: {}, activeAt: now }])) as Record<AgentId, AgentState>,
+    agents: Object.fromEntries(AGENT_IDS.map((agent) => [agent, { sessions: {}, reset: false, activeAt: now }])) as Record<AgentId, AgentState>,
     badges: badges.map((entry) => structuredClone(entry)),
   };
+}
+
+function bubbleKind(event: PetEvent): BubbleKind {
+  if (event.notice === "limit-reset") return "reset";
+  if (event.status === "done") return "done";
+  if (event.status === "needs-you") return "needs-you";
+  return "notice";
 }
 
 function applyToAgent(state: AgentState, event: PetEvent, now: number): AgentState {
@@ -69,9 +100,20 @@ function applyToAgent(state: AgentState, event: PetEvent, now: number): AgentSta
     if (event.status === "needs-you") session.needsYou = true;
     if (event.status === "idle") session.working = false;
     next.sessions[key] = session;
+    if (state.bubble?.kind === "needs-you" && (state.bubble.sessionId ?? "") === key) next.bubble = undefined;
   }
   if (event.note) next.note = event.note;
   if (event.emote) next.emote = { name: event.emote, serial: (state.emote?.serial ?? 0) + 1 };
+  if (event.notice === "limit-reset") next.reset = true;
+  if (event.message) {
+    next.bubble = {
+      text: event.message.text,
+      ...(event.message.action && { action: event.message.action }),
+      kind: bubbleKind(event),
+      ...(event.sessionId && { sessionId: event.sessionId }),
+      serial: (state.bubble?.serial ?? 0) + 1,
+    };
+  }
   return next;
 }
 
@@ -92,15 +134,20 @@ export function applyPetEvent(book: PetBook, event: PetEvent, now: number): PetB
   return { agents, badges };
 }
 
-/** A click clears the pet's done and needs-you notices. `cleared` is false for a calm pet. */
+/**
+ * A click on the pet, its bubble, or the bubble's close button clears the pet's
+ * done and needs-you notices, its bubble, and a limit reset. `cleared` is false
+ * for a calm pet.
+ */
 export function clickPet(book: PetBook, agent: AgentId, now: number): { book: PetBook; cleared: boolean } {
   const state = book.agents[agent];
-  const noticed = Object.values(state.sessions).some((session) => session.done || session.needsYou);
+  const noticed = state.reset || state.bubble !== undefined
+    || Object.values(state.sessions).some((session) => session.done || session.needsYou);
   const sessions = Object.fromEntries(Object.entries(state.sessions).map(([key, session]) => [
     key, noticed ? { ...session, done: false, needsYou: false } : session,
   ]));
   return {
-    book: { ...book, agents: { ...book.agents, [agent]: { ...state, sessions, activeAt: now } } },
+    book: { ...book, agents: { ...book.agents, [agent]: { ...state, sessions, bubble: undefined, reset: false, activeAt: now } } },
     cleared: noticed,
   };
 }
@@ -133,11 +180,15 @@ export function petView(book: PetBook, agent: AgentId): PetView {
   const done = sessions.some((session) => session.done);
   const needsYou = sessions.some((session) => session.needsYou);
   const working = sessions.some((session) => session.working);
+  const notice = state.bubble?.kind === "notice";
   return {
     // Done wins over working; a question shows as a bubble whatever the mood.
     mood: done ? "done" : needsYou ? "needs-you" : working ? "working" : "idle",
     done,
     needsYou,
+    call: done ? "done" : needsYou ? "needsYou" : notice ? "notice" : null,
+    reset: state.reset,
+    ...(state.bubble && { bubble: state.bubble }),
     count: sessions.filter((session) => session.working || session.needsYou).length,
     note: state.note,
     badges: book.badges.filter((entry) => (entry.agent === undefined || entry.agent === agent) && entry.badge.count > 0),

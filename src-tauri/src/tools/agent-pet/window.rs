@@ -1,5 +1,6 @@
 //! The pet window: a transparent, always-on-top, click-through layer over the
-//! work area of the screen the mouse is on. The window passes every click
+//! work area of the screen the mouse is on (or of the main screen, when the
+//! pets should not follow the mouse). The window passes every click
 //! through until the frontend reports that the cursor is over a pet. A poller
 //! thread follows the cursor across screens, sends its position to the pet
 //! surface, and hides the pets while another app runs full screen.
@@ -39,6 +40,8 @@ pub struct PetWindowState {
 struct Wanted {
     shown: bool,
     interactive: bool,
+    /// Stay on the main screen instead of following the mouse.
+    stay: bool,
 }
 
 impl PetWindowState {
@@ -77,6 +80,16 @@ struct Screen {
     full: Rect,
     work: Rect,
     scale: f64,
+    primary: bool,
+}
+
+/// The screen the pets live on: the one under the cursor, or the main one when they stay put.
+fn pick_screen(screens: &[Screen], x: f64, y: f64, follow: bool) -> Option<Screen> {
+    let under_cursor = || screens.iter().find(|screen| screen.full.contains(x, y));
+    let primary = || screens.iter().find(|screen| screen.primary);
+    if follow { under_cursor().or_else(primary) } else { primary().or_else(under_cursor) }
+        .or(screens.first())
+        .copied()
 }
 
 /// Where the pet surface sees the cursor, in its own CSS pixels.
@@ -117,18 +130,20 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// The pet surface reports whether any pet is shown and whether the cursor is over one.
+/// The pet surface reports whether any pet is shown, whether the cursor is over one,
+/// and whether the pets follow the mouse to other screens.
 #[tauri::command]
 pub fn agent_pet_set_window(
     window: WebviewWindow,
     state: tauri::State<'_, PetWindowState>,
     shown: bool,
     interactive: bool,
+    follow: bool,
 ) -> Result<(), String> {
     if window.label() != LABEL {
         return Err("This command is not available from this window.".into());
     }
-    *state.inner.lock().map_err(|_| "The pet window is unavailable.")? = Wanted { shown, interactive };
+    *state.inner.lock().map_err(|_| "The pet window is unavailable.")? = Wanted { shown, interactive, stay: !follow };
     set_click_through(&window, &state, !(shown && interactive));
     Ok(())
 }
@@ -164,7 +179,7 @@ fn poll(app: AppHandle) {
             thread::sleep(TICK);
             continue;
         };
-        let Some(screen) = screens.iter().find(|screen| screen.full.contains(x, y)).or(screens.first()).copied() else {
+        let Some(screen) = pick_screen(&screens, x, y, !wanted.stay) else {
             thread::sleep(TICK);
             continue;
         };
@@ -191,9 +206,10 @@ fn poll(app: AppHandle) {
 }
 
 fn available_screens(app: &AppHandle) -> Vec<Screen> {
+    let primary = app.primary_monitor().ok().flatten();
     let mut monitors = app.available_monitors().unwrap_or_default();
     if monitors.is_empty() {
-        monitors.extend(app.primary_monitor().ok().flatten());
+        monitors.extend(primary.clone());
     }
     monitors.iter().map(|monitor| {
         let work = monitor.work_area();
@@ -201,6 +217,7 @@ fn available_screens(app: &AppHandle) -> Vec<Screen> {
             full: Rect { x: monitor.position().x, y: monitor.position().y, width: monitor.size().width, height: monitor.size().height },
             work: Rect { x: work.position.x, y: work.position.y, width: work.size.width, height: work.size.height },
             scale: monitor.scale_factor(),
+            primary: primary.as_ref().is_some_and(|primary| primary.position() == monitor.position() && primary.size() == monitor.size()),
         }
     }).collect()
 }
@@ -327,5 +344,19 @@ mod tests {
         assert!(screen.contains(-1.0, 1079.0));
         assert!(!screen.contains(0.0, 0.0));
         assert!(!screen.contains(-1000.0, 1080.0));
+    }
+
+    #[test]
+    fn follows_the_mouse_or_stays_on_the_main_screen() {
+        let screen = |x: i32, primary: bool| {
+            let rect = Rect { x, y: 0, width: 1920, height: 1080 };
+            Screen { full: rect, work: rect, scale: 1.0, primary }
+        };
+        let screens = [screen(-1920, false), screen(0, true)];
+        assert_eq!(pick_screen(&screens, -500.0, 300.0, true), Some(screens[0]));
+        assert_eq!(pick_screen(&screens, -500.0, 300.0, false), Some(screens[1]));
+        // A cursor between screens falls back to the main one.
+        assert_eq!(pick_screen(&screens, 5000.0, 300.0, true), Some(screens[1]));
+        assert_eq!(pick_screen(&[], 0.0, 0.0, true), None);
     }
 }

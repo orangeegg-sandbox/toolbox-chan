@@ -106,6 +106,50 @@ describe("pet badges", () => {
   });
 });
 
+describe("bubbles and calls", () => {
+  const link = { type: "open-link", url: "codex://threads/a" } as const;
+
+  it("says what a message says and answers with the strongest call", () => {
+    let book = play([hook({ agent: "codex", sessionId: "a", status: "done", message: { text: "Fix it is ready", action: link } })]);
+    expect(petView(book, "codex")).toMatchObject({ call: "done", bubble: { text: "Fix it is ready", action: link, kind: "done", sessionId: "a" } });
+    expect(petView(book, "claude")).toMatchObject({ call: null, reset: false });
+    expect(petView(book, "claude").bubble).toBeUndefined();
+    // A newer message replaces the bubble, but done still wins the call.
+    book = applyPetEvent(book, { source: "todo", agent: "codex", message: { text: "Run tests is marked as TODO" } }, 5);
+    expect(petView(book, "codex")).toMatchObject({ call: "done", bubble: { kind: "notice", serial: 2 } });
+    const cleared = clickPet(book, "codex", 6);
+    expect(cleared.cleared).toBe(true);
+    expect(petView(cleared.book, "codex")).toMatchObject({ call: null, done: false });
+    expect(petView(cleared.book, "codex").bubble).toBeUndefined();
+  });
+
+  it("makes any other message a notice call until it is dismissed", () => {
+    const book = play([{ source: "todo", agent: "claude", message: { text: "Rotate the key is marked as TODO" } }]);
+    expect(petView(book, "claude")).toMatchObject({ mood: "idle", call: "notice", bubble: { kind: "notice" } });
+    expect(clickPet(book, "claude", 1).cleared).toBe(true);
+  });
+
+  it("drops a question's bubble when that chat moves on", () => {
+    let book = play([
+      hook({ agent: "claude", sessionId: "a", status: "needs-you", message: { text: "Fix it needs you" } }),
+    ]);
+    expect(petView(book, "claude")).toMatchObject({ call: "needsYou", bubble: { kind: "needs-you" } });
+    book = applyPetEvent(book, hook({ agent: "claude", sessionId: "b", status: "working" }), 1);
+    expect(petView(book, "claude").bubble?.kind).toBe("needs-you");
+    book = applyPetEvent(book, hook({ agent: "claude", sessionId: "a", status: "working" }), 2);
+    expect(petView(book, "claude").bubble).toBeUndefined();
+    expect(petView(book, "claude").call).toBeNull();
+  });
+
+  it("keeps a limit reset until the pet is clicked", () => {
+    const book = play([{ source: "limits", agent: "codex", notice: "limit-reset", message: { text: "Codex's weekly limit is reset" } }]);
+    expect(petView(book, "codex")).toMatchObject({ reset: true, call: null, bubble: { kind: "reset" } });
+    const clicked = clickPet(book, "codex", 1);
+    expect(clicked.cleared).toBe(true);
+    expect(petView(clicked.book, "codex").reset).toBe(false);
+  });
+});
+
 describe("pet session cleanup", () => {
   it("ends silent working chats and forgets quiet ones, but keeps notices", () => {
     const book = play([

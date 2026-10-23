@@ -1,0 +1,29 @@
+{
+  "generator": "Codex built-in image_gen",
+  "date": "2026-10-23",
+  "character": "Codex-Chan",
+  "agent": "OpenAI GPT / Codex",
+  "artist_credit": "ZipZipPipe",
+  "reference": "../../references/codex-chan-reference.webp",
+  "use_case": "identity-preserve / stylized-concept",
+  "request": "../../idle-moves.md",
+  "method": "Six poses generated together as one horizontal strip, then sliced, cleaned and normalized to transparent 256x256 frames.",
+  "assumptions": [
+    "Six frames per move. Right-facing three-quarter view throughout.",
+    "One uniform resize factor per animation; modest pose-dependent silhouette height variation is preserved.",
+    "A plain pale-blue teacup remains in both hands at the start and end; the existing hairclip emblem is part of the character design."
+  ],
+  "post_processing": "System.Drawing: equal-width strip cells, remove detached alpha specks and adjacent-cell fragments, preserve generated transparency, one uniform bicubic scale per animation, centered transparent 256x256 canvases with lowest visible pixel at y=244. Alpha below 12 cleared, alpha at least 245 made opaque. See review.json for exact bounds and checks.",
+  "animations": [
+    {
+      "state": "tea",
+      "frames": 6,
+      "references": [
+        "../../references/codex-chan-reference.webp",
+        "../../codex/frames/idle-1.png"
+      ],
+      "source_strip": "source-strip.png",
+      "prompt": "Draw a short looping sprite animation of Codex-Chan by ZipZipPipe from the attached reference,\nas a cute moe chibi about 2.5 heads tall, clean anime line art with soft cel shading.\nMatch the attached idle frame exactly: same face, hair, outfit, colours, and size.\nImage 1 original character design. Image 2 approved chibi idle sprite is the PRIMARY reference for exact head size, body proportions, face and rendering.\n\nMove: she lifts a small teacup in both hands, sips with sleepy eyes, smiles, and lowers it. Dragon tail stays visible as in her idle frames.\nIt plays while she is idle, so it starts and ends close to a calm standing pose.\n\nMake 6 frames as ONE horizontal strip of equal square cells, in order, left to right.\nFacing right, three-quarter view. Feet stay on the same ground line in every cell.\nSame character scale in every cell.\nTransparent background.\nNo text, speech bubbles, question marks, badges, UI, shadows on the ground, or scenery.\nModest white off-shoulder ruffled dress with long puffy sleeves and blue ribbons, chest pocket with pens, fluffy white slippers. Long wavy pale lavender-white hair, small blue-white dragon horns, pointed ears, sleepy blue eyes, blue cloud hairclip, white swirl-knot ornament with tassel, pale-blue scaled dragon tail curling behind to image LEFT. Tail fully visible in every frame. Only the existing tiny >_ hairclip emblem is permitted as part of character design.\n\nSix frames: 1 teacup held low near waist with both hands, calm sleepy eyes; 2 raise cup to chest; 3 cup touches lips for a tiny sip, sleepy half closed eyes; 4 cup still at mouth, content closed eyes; 5 cup lowered to chest and small happy smile; 6 cup lowered back to waist, calm standing close to frame 1. A small plain pale-blue teacup, no saucer, no floating steam, no extra objects.\nKeep head-to-feet height and head size identical, hair and tail softly settle. Nose and feet face IMAGE RIGHT throughout.\nCRITICAL SPACING: ONE horizontal row of EXACTLY SIX COMPLETE SMALL figures. Six equal virtual SQUARE cells centered across wide transparent canvas. On a 3:1 canvas each virtual cell side is half canvas height. Every entire figure must fit entirely between y=29% and y=71% of total canvas height; upper and lower padding completely transparent. Centers x=8.33%,25%,41.67%,58.33%,75%,91.67%; full character WIDTH including tail at most 11% of canvas width. Big empty gaps between silhouettes. No cropping, no overlap, no cell borders. If possible actual canvas 3072x512 six square cells; otherwise transparent padding above and below the centered square-cell strip."
+    }
+  ]
+}

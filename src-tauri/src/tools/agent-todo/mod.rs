@@ -13,7 +13,7 @@ mod session;
 mod store;
 
 use crate::platform::{
-    pet_events::{AgentId, PetAction, PetBadge, PetEvent, PetHub},
+    pet_events::{AgentId, PetAction, PetBadge, PetEvent, PetHub, PetMessage},
     tray::MAIN_WINDOW,
 };
 use scanner::{Roots, ScanState};
@@ -29,6 +29,8 @@ use tauri::{AppHandle, Emitter, Manager, State};
 pub const TOOL_ID: &str = "agent-todo";
 const CHANGED_EVENT: &str = "agent-todo-changed";
 const SCAN_EVERY: Duration = Duration::from_secs(4);
+/// How much of an item the pet says; its message holds at most 200 characters.
+const MAX_MESSAGE_ITEM: usize = 120;
 
 pub struct AgentTodo {
     shared: Arc<Shared>,
@@ -130,8 +132,37 @@ fn badge_events(previous: Option<[u32; 3]>, counts: [u32; 3]) -> Vec<PetEvent> {
                 count: count.min(9999),
                 action: Some(PetAction::OpenTool { tool_id: TOOL_ID.into() }),
             })),
+            message: None,
+            notice: None,
         })
         .collect()
+}
+
+/// What the pets say about new items: one bubble per agent, naming the first new item.
+fn item_messages(added: &[(AgentId, String)]) -> Vec<PetEvent> {
+    AGENTS.iter().filter_map(|agent| {
+        let texts: Vec<&str> = added.iter().filter(|(owner, _)| owner == agent).map(|(_, text)| text.as_str()).collect();
+        let first = texts.first()?;
+        let mut short: String = first.chars().take(MAX_MESSAGE_ITEM).collect();
+        if first.chars().count() > MAX_MESSAGE_ITEM {
+            short.push('…');
+        }
+        let text = match texts.len() {
+            1 => format!("“{short}” is marked as TODO"),
+            count => format!("“{short}” and {} more are marked as TODO", count - 1),
+        };
+        Some(PetEvent {
+            source: TOOL_ID.into(),
+            agent: Some(*agent),
+            session_id: None,
+            status: None,
+            emote: None,
+            note: None,
+            badge: None,
+            message: Some(PetMessage { text, action: Some(PetAction::OpenTool { tool_id: TOOL_ID.into() }) }),
+            notice: None,
+        })
+    }).collect()
 }
 
 /// Starts the tool's background scanner. Called once from the app's setup.
@@ -184,14 +215,16 @@ impl Shared {
             }
             outcome
         };
-        let changed = {
+        let (changed, added) = {
             let mut data = lock(&self.data);
-            let added = data.add(outcome.found);
+            let count = data.add(outcome.found);
+            // New items are appended, so they are the last `count`.
+            let added: Vec<(AgentId, String)> = data.items[data.items.len() - count..].iter().map(|item| (item.agent, item.text.clone())).collect();
             let mut retitled = false;
             for (agent, session_id, title) in &outcome.titles {
                 retitled |= data.retitle(*agent, session_id, title);
             }
-            added > 0 || retitled
+            (count > 0 || retitled, added)
         };
         let error = outcome.errors.first().cloned();
         let error_changed = {
@@ -201,6 +234,13 @@ impl Shared {
         };
         if changed {
             self.save_and_announce(app);
+            if let Some(hub) = app.try_state::<PetHub>() {
+                for event in item_messages(&added) {
+                    if let Err(error) = hub.publish(app, event) {
+                        eprintln!("agent-todo: the pet message was not delivered: {error}");
+                    }
+                }
+            }
         } else if error_changed {
             let _ = app.emit_to(MAIN_WINDOW, CHANGED_EVENT, ());
         }
@@ -325,6 +365,24 @@ mod tests {
 
     fn summary(events: &[PetEvent]) -> Vec<(Option<AgentId>, Option<u32>)> {
         events.iter().map(|event| (event.agent, event.badge.clone().flatten().map(|badge| badge.count))).collect()
+    }
+
+    #[test]
+    fn tells_each_pet_about_its_new_items_once() {
+        let events = item_messages(&[
+            (AgentId::Codex, "Run the tests".into()),
+            (AgentId::Claude, "Rotate the key".into()),
+            (AgentId::Codex, "Update the docs".into()),
+            (AgentId::Codex, "Ship it".into()),
+        ]);
+        let texts: Vec<_> = events.iter().map(|event| (event.agent, event.message.as_ref().unwrap().text.clone())).collect();
+        assert_eq!(texts, [
+            (Some(AgentId::Claude), "“Rotate the key” is marked as TODO".to_string()),
+            (Some(AgentId::Codex), "“Run the tests” and 2 more are marked as TODO".to_string()),
+        ]);
+        let long = item_messages(&[(AgentId::Claude, "x".repeat(500))]);
+        assert!(long[0].validate().is_ok(), "long items are shortened to fit a message");
+        assert!(item_messages(&[]).is_empty());
     }
 
     #[test]

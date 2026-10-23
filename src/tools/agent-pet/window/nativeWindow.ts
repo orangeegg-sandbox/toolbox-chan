@@ -30,15 +30,17 @@ export function subscribeNativePointer(listener: (pointer: NativePointer) => voi
 let reported = "";
 
 /**
- * Tells the native window whether any pet is shown and whether the cursor is
- * over one. Clicks pass through everywhere else. Repeats are not sent.
+ * Tells the native window whether any pet is shown, whether the cursor is over
+ * one, and whether the window follows the mouse to other screens (otherwise it
+ * stays on the main screen). Clicks pass through everywhere the page does not
+ * take them. Repeats are not sent.
  */
-export function reportPetWindow(shown: boolean, interactive: boolean) {
+export function reportPetWindow(shown: boolean, interactive: boolean, follow: boolean) {
   if (!isTauri()) return;
-  const key = `${shown}:${interactive}`;
+  const key = `${shown}:${interactive}:${follow}`;
   if (key === reported) return;
   reported = key;
-  void invoke("agent_pet_set_window", { shown, interactive }).catch(() => {
+  void invoke("agent_pet_set_window", { shown, interactive, follow }).catch(() => {
     reported = "";
   });
 }

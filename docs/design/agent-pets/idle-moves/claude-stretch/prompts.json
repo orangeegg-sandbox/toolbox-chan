@@ -1,0 +1,36 @@
+{
+  "generator": "Codex built-in image_gen",
+  "date": "2026-10-23",
+  "character": "Claude-Chan",
+  "agent": "Claude Code",
+  "artist_credit": "Ninon",
+  "reference": "../../references/claude-chan-reference.webp",
+  "use_case": "identity-preserve / stylized-concept",
+  "request": "../../idle-moves.md",
+  "method": "Six poses generated together as one horizontal strip, then sliced, cleaned and normalized to transparent 256x256 frames.",
+  "assumptions": [
+    "Six frames per move. Right-facing three-quarter view throughout.",
+    "One uniform resize factor per animation; modest pose-dependent silhouette height variation is preserved.",
+    "A compact one-arm overhead stretch keeps the raised hand near crown height."
+  ],
+  "post_processing": "System.Drawing: equal-width strip cells, remove detached alpha specks and adjacent-cell fragments, preserve generated transparency, one uniform bicubic scale per animation, centered transparent 256x256 canvases with lowest visible pixel at y=244. Alpha below 12 cleared, alpha at least 245 made opaque. See review.json for exact bounds and checks.",
+  "animations": [
+    {
+      "state": "stretch",
+      "frames": 6,
+      "references": [
+        "../../references/claude-chan-reference.webp",
+        "../../claude/frames/idle-1.png"
+      ],
+      "source_strip": "source-strip.png",
+      "revision": "Second attempt adds separation between silhouettes and keeps the book visible during stretch.",
+      "prompt": "Draw a short looping sprite animation of Claude-Chan by Ninon from the attached reference,\nas a cute moe chibi about 2.5 heads tall, clean anime line art with soft cel shading.\nMatch the attached idle frame exactly: same face, hair, outfit, colours, and size.\nImage 1 is the original identity reference; image 2 is the approved chibi idle sprite, the PRIMARY reference for proportions, scale and rendering.\n\nMove: she tucks her brown sunburst book under one arm, stretches her other arm over her head with a small yawn, then relaxes back to a calm stand.\nIt plays while she is idle, so it starts and ends close to a calm standing pose.\n\nMake 6 frames as ONE horizontal strip of equal square cells, in order, left to right.\nFacing right, three-quarter view. Feet stay on the same ground line in every cell.\nSame character scale in every cell.\nTransparent background.\nNo text, speech bubbles, question marks, badges, UI, shadows on the ground, or scenery.\nModest outfit: fully covered cream HIGH COLLAR blouse, no chest cutout, black cravat with orange brooch, black corset, cream skirt with black and orange embroidered panels, cream lace-up boots; long orange hair, sunburst flower hair ornament and black bow. Brown closed book has orange sunburst and no lettering.\n\nPrecise six-frame action: 1 calm standing holding closed book close to torso; 2 book tucked firmly under left arm, right elbow rises; 3 small sleepy yawn, right forearm curves over crown of head in compact overhead stretch, hand no more than 3% above hair crown; 4 hold compact overhead stretch with eyes closed; 5 lower right arm, yawn turns to soft smile; 6 return to calm standing with book held at torso, closely matching frame 1.\nKeep head/feet height constant within 3%, no head/body resizing. Keep both boots planted, same face angle facing IMAGE RIGHT.\nLayout: six complete, separately spaced figures in ONE ROW, equal square cells, ideally 1536x256 or 3072x512. No borders or labels. If the canvas is taller than the row, leave blank transparent padding above and below; each virtual square cell has side length total canvas width / 6, and figures occupy 86% of that virtual square height and at most 76% of cell width. Absolutely no overlap or cropping of adjacent hair, skirt or hands. Real alpha, no painted checkerboard.\nCRITICAL LAYOUT OVERRIDE: the figures in a previous attempt were too large and touched. On a 3:1 wide canvas each of the six virtual square cells is ONLY HALF the canvas height. Put all six SMALL characters entirely within the middle horizontal band, from y=28% to y=72% of the full canvas height. Top 28% and bottom 28% MUST be completely empty transparency. Each figure's full width including all hair is at most 11% of total canvas width. Centers at x=8.33%,25%,41.67%,58.33%,75%,91.67%. This leaves big clear transparent gutters. Six small figures, not tall figures. Keep the brown book visible under the non-stretching arm also during frames 3 and 4."
+    }
+  ],
+  "discarded_attempts": [
+    {
+      "reason": "Figures touched neighboring cells; book not reliably visible during peak stretch.",
+      "prompt": "Draw a short looping sprite animation of Claude-Chan by Ninon from the attached reference,\nas a cute moe chibi about 2.5 heads tall, clean anime line art with soft cel shading.\nMatch the attached idle frame exactly: same face, hair, outfit, colours, and size.\nImage 1 is the original identity reference; image 2 is the approved chibi idle sprite, the PRIMARY reference for proportions, scale and rendering.\n\nMove: she tucks her brown sunburst book under one arm, stretches her other arm over her head with a small yawn, then relaxes back to a calm stand.\nIt plays while she is idle, so it starts and ends close to a calm standing pose.\n\nMake 6 frames as ONE horizontal strip of equal square cells, in order, left to right.\nFacing right, three-quarter view. Feet stay on the same ground line in every cell.\nSame character scale in every cell.\nTransparent background.\nNo text, speech bubbles, question marks, badges, UI, shadows on the ground, or scenery.\nModest outfit: fully covered cream HIGH COLLAR blouse, no chest cutout, black cravat with orange brooch, black corset, cream skirt with black and orange embroidered panels, cream lace-up boots; long orange hair, sunburst flower hair ornament and black bow. Brown closed book has orange sunburst and no lettering.\n\nPrecise six-frame action: 1 calm standing holding closed book close to torso; 2 book tucked firmly under left arm, right elbow rises; 3 small sleepy yawn, right forearm curves over crown of head in compact overhead stretch, hand no more than 3% above hair crown; 4 hold compact overhead stretch with eyes closed; 5 lower right arm, yawn turns to soft smile; 6 return to calm standing with book held at torso, closely matching frame 1.\nKeep head/feet height constant within 3%, no head/body resizing. Keep both boots planted, same face angle facing IMAGE RIGHT.\nLayout: six complete, separately spaced figures in ONE ROW, equal square cells, ideally 1536x256 or 3072x512. No borders or labels. If the canvas is taller than the row, leave blank transparent padding above and below; each virtual square cell has side length total canvas width / 6, and figures occupy 86% of that virtual square height and at most 76% of cell width. Absolutely no overlap or cropping of adjacent hair, skirt or hands. Real alpha, no painted checkerboard."
+    }
+  ]
+}

@@ -15,6 +15,10 @@
   pointer-events: none;
   will-change: transform;
 }
+.agent-pet-layer .pet-body {
+  position: absolute;
+  inset: 0;
+}
 .agent-pet-layer .pet-frame {
   position: absolute;
   inset: 0;
@@ -132,6 +136,192 @@
   transform: translate(-50%, calc(-100% - var(--space-1)));
 }
 
+/* Chat bubbles: a notice takes clicks (its text opens the link, × dismisses it);
+   an idle line is only shown and never catches the pointer. */
+.agent-pet-layer .pet-bubble {
+  position: absolute;
+  left: calc(50% - var(--bubble-shift, 0px));
+  top: 8%;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  width: max-content;
+  max-width: 240px;
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  transform: translate(-50%, calc(-100% - var(--space-2)));
+  animation: pet-bubble-in var(--duration-base) var(--ease-out);
+}
+.agent-pet-layer .pet-bubble[data-pet-hit] {
+  pointer-events: auto;
+}
+.agent-pet-layer .pet-bubble[data-kind="talk"] {
+  padding: var(--space-1) var(--space-3);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-muted);
+}
+.agent-pet-layer .pet-bubble[data-kind="done"] {
+  border-color: var(--accent-line);
+}
+.agent-pet-layer .pet-bubble[data-kind="needs-you"] {
+  border-color: var(--lilac-line);
+}
+.agent-pet-layer .pet-bubble[data-kind="reset"] {
+  border-color: var(--butter-line);
+}
+.agent-pet-layer .pet-bubble::after {
+  content: "";
+  position: absolute;
+  left: clamp(var(--space-2), calc(50% + var(--bubble-shift, 0px) - 5px), calc(100% - var(--space-4)));
+  bottom: -6px;
+  width: 9px;
+  height: 9px;
+  background: var(--panel);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  transform: rotate(45deg);
+}
+.agent-pet-layer .pet-bubble[data-kind="talk"]::after {
+  border-color: var(--line);
+}
+.agent-pet-layer .pet-bubble-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.agent-pet-layer .pet-bubble-text:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.agent-pet-layer .pet-bubble-text svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.agent-pet-layer .pet-bubble-close {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-subtle);
+  cursor: pointer;
+}
+.agent-pet-layer .pet-bubble-close:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+@keyframes pet-bubble-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% + var(--space-1)));
+  }
+}
+
+/* A limit reset: a soft ring of light around the cheering pet until it is clicked. */
+.agent-pet-layer .pet-reset {
+  position: absolute;
+  left: 18%;
+  top: 14%;
+  width: 64%;
+  height: 84%;
+  border-radius: var(--radius-full);
+  border: 2px dashed var(--brand-butter);
+  box-shadow: 0 0 18px var(--brand-butter), inset 0 0 14px var(--brand-mint);
+  opacity: 0.85;
+  animation: pet-reset-spin 6s linear infinite, pet-reset-glow 1.6s ease-in-out infinite alternate;
+}
+@keyframes pet-reset-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes pet-reset-glow {
+  from {
+    opacity: 0.45;
+  }
+}
+
+/* Teleport portals: a warm one to jump into, a cool one to come out of. */
+.agent-pet-layer .pet-portal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  border: 3px solid var(--brand-butter);
+  background: radial-gradient(closest-side, var(--brand-ink), transparent);
+  box-shadow: 0 0 16px var(--brand-butter), inset 0 0 10px var(--brand-butter);
+  transform-origin: center;
+}
+.agent-pet-layer .pet-portal[data-exit="true"] {
+  border-color: var(--brand-mint);
+  box-shadow: 0 0 16px var(--brand-mint), inset 0 0 10px var(--brand-mint);
+}
+
+/* Drawing the idle zone: the whole window takes the pointer. */
+.agent-pet-layer .pet-zone-editor {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: var(--overlay);
+  cursor: crosshair;
+}
+.agent-pet-layer .pet-zone-box {
+  position: absolute;
+  pointer-events: none;
+  border: 2px dashed var(--brand-mint);
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  opacity: 0.55;
+}
+.agent-pet-layer .pet-zone-box[data-state="old"] {
+  opacity: 0.25;
+}
+.agent-pet-layer .pet-zone-box[data-state="new"] {
+  border-style: solid;
+  opacity: 0.7;
+}
+.agent-pet-layer .pet-zone-toolbar {
+  position: absolute;
+  left: 50%;
+  top: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  max-width: calc(100% - var(--space-8));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-md);
+  cursor: default;
+  transform: translateX(-50%);
+}
+.agent-pet-layer .pet-zone-toolbar p {
+  flex: 1 1 220px;
+  margin: 0 var(--space-2) 0 0;
+}
+
 /* Pet settings in the toolbox window. */
 .agent-pet-settings .settings-card:first-child {
   margin-top: 0;
@@ -205,6 +395,61 @@
 }
 .agent-pet-settings .pet-hook-error {
   color: var(--error);
+}
+.agent-pet-settings .pet-zone-setting {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* A small picture of a screen with the zone in it. */
+.agent-pet-settings .pet-zone-preview {
+  position: relative;
+  width: 96px;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--inset);
+  overflow: hidden;
+}
+.agent-pet-settings .pet-zone-preview span {
+  position: absolute;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  background: var(--accent-soft);
+}
+.agent-pet-settings .pet-move-list {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+.agent-pet-settings .pet-move-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.agent-pet-settings .pet-move-list li > div {
+  flex: 1;
+  min-width: 0;
+}
+.agent-pet-settings .pet-move-list p {
+  margin-top: 0;
+}
+.agent-pet-settings .pet-lines {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  resize: vertical;
+}
+.agent-pet-settings .pet-lines:disabled {
+  color: var(--text-subtle);
 }
 .agent-pet-settings .pet-credits {
   padding: var(--space-4) var(--space-6);

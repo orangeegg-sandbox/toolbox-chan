@@ -8,6 +8,10 @@ pub fn run() {
     if let Some(code) = tools::agent_pet::hook_cli::run_if_requested() {
         std::process::exit(code);
     }
+    // Claude Code runs it as its status line wrapper; it also exits before Tauri starts.
+    if let Some(code) = tools::agent_pet::limits::status_line::run_if_requested() {
+        std::process::exit(code);
+    }
     tauri::Builder::default()
         // Registered first: a second launch only brings the running toolbox forward.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -39,6 +43,7 @@ pub fn run() {
         .manage(tools::ocr::online::OnlineRequests::default())
         .manage(tools::agent_pet::window::PetWindowState::default())
         .manage(tools::agent_pet::dsh_watch::DshWatcher::default())
+        .manage(tools::agent_pet::limits::LimitWatcher::default())
         .on_window_event(|window, event| {
             if window.label() != platform::tray::MAIN_WINDOW {
                 return;
@@ -79,7 +84,13 @@ pub fn run() {
             tools::agent_pet::window::agent_pet_set_window,
             tools::agent_pet::hooks::agent_pet_hooks,
             tools::agent_pet::hooks::agent_pet_install_hooks,
-            tools::agent_pet::hooks::agent_pet_remove_hooks
+            tools::agent_pet::hooks::agent_pet_remove_hooks,
+            tools::agent_pet::idle_moves::agent_pet_idle_moves,
+            tools::agent_pet::idle_moves::agent_pet_import_idle_move,
+            tools::agent_pet::idle_moves::agent_pet_remove_idle_move,
+            tools::agent_pet::limits::agent_pet_limits,
+            tools::agent_pet::limits::agent_pet_install_status_line,
+            tools::agent_pet::limits::agent_pet_remove_status_line
         ])
         .run(tauri::generate_context!())
         .expect("error while running Toolbox-Chan");

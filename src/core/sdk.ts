@@ -8,7 +8,7 @@ export { useToolCommands } from "./commands/CommandProvider";
 export { copyText, exportText } from "./platform/text";
 export { notifyPet, subscribePetEvents, subscribePetVisibility, getPetState, runPetAction } from "./pet/petEvents";
 export {
-  AGENT_IDS, PET_EMOTES, PET_STATUSES, petEventError,
+  AGENT_IDS, PET_EMOTES, PET_NOTICES, PET_STATUSES, petEventError,
   type AgentId, type PetAction, type PetBadge, type PetBadgeEntry, type PetDoorStatus, type PetEmote, type PetEvent,
-  type PetState, type PetStatus,
+  type PetMessage, type PetNotice, type PetState, type PetStatus,
 } from "./pet/types";

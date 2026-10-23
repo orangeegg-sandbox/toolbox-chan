@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  createBody, dragBody, emoteBody, EMOTE_MS, fitBody, grabBody, LAND_MS, releaseBody, SLEEP_AFTER_MS, stepBody,
-  type Body, type Point, type World,
+  actBody, canAct, createBody, dragBody, emoteBody, EMOTE_MS, fitBody, grabBody, LAND_MS, releaseBody, SLEEP_AFTER_MS,
+  stepBody, WARP, WARP_MS, warpView, type Band, type Body, type Plan, type Point, type World,
 } from "../model/motion";
 import type { Mood } from "../model/petModel";
 
@@ -12,11 +12,11 @@ function world(now: number, cursor: Point | null = null, overrides: Partial<Worl
 }
 
 /** Runs the body for `seconds` at 60 steps per second and returns the time reached. */
-function run(body: Body, mood: Mood, from: number, seconds: number, cursor: Point | null = null, overrides: Partial<World> = {}) {
+function run(body: Body, mood: Mood, from: number, seconds: number, cursor: Point | null = null, overrides: Partial<World> = {}, plan: Plan = {}) {
   let now = from;
   for (let step = 0; step < seconds * 60; step++) {
     now += 1000 / 60;
-    stepBody(body, mood, world(now, cursor, overrides));
+    stepBody(body, mood, world(now, cursor, overrides), plan);
   }
   return now;
 }
@@ -148,5 +148,145 @@ describe("pet motion", () => {
     fitBody(body, { width: 1600, height: 900 }, { width: 800, height: 600, size: SIZE });
     expect(body.x).toBeLessThanOrEqual(800 - SIZE * 0.4);
     expect(body.y).toBe(600);
+  });
+});
+
+describe("the idle zone", () => {
+  // The bottom-left corner of the screen, raised a little above the taskbar.
+  const zone: Band = { left: 100, right: 500, floor: 800 };
+
+  it("starts, wanders, and works inside the zone", () => {
+    const bodies = [0, 1, 2].map((index) => createBody(index, world(0, null, { zone })));
+    for (const body of bodies) {
+      expect(body.y).toBe(800);
+      expect(body.x).toBeGreaterThanOrEqual(100 + SIZE * 0.4);
+      expect(body.x).toBeLessThanOrEqual(500 - SIZE * 0.4);
+    }
+    const body = bodies[0];
+    let now = 0;
+    for (let step = 0; step < 60 * 60; step++) {
+      now += 1000 / 60;
+      stepBody(body, "idle", world(now, null, { zone, random: () => (step % 7) / 7 }));
+      body.calmSince = now;
+      expect(body.x).toBeGreaterThanOrEqual(100 + SIZE * 0.4 - 0.001);
+      expect(body.x).toBeLessThanOrEqual(500 - SIZE * 0.4 + 0.001);
+    }
+    run(body, "working", now, 3, null, { zone });
+    expect(body.pose).toBe("working");
+  });
+
+  it("walks back into the zone after being dropped outside it", () => {
+    const body = createBody(0, world(0, null, { zone }));
+    grabBody(body, { x: body.x, y: body.y - 60 }, 0);
+    dragBody(body, { x: 1300, y: 400 }, world(0));
+    releaseBody(body, world(10, null, { zone }));
+    const poses = new Set<string>();
+    let now = 10;
+    for (let step = 0; step < 60 * 20; step++) {
+      now += 1000 / 60;
+      stepBody(body, "idle", world(now, null, { zone }));
+      poses.add(body.pose);
+    }
+    // It fell to the bottom edge first, then went home.
+    expect(poses).toContain("land");
+    expect(poses).toContain("walk");
+    expect(body.y).toBe(800);
+    expect(body.x).toBeLessThanOrEqual(500 - SIZE * 0.4);
+    expect(body.phase).toBe("ground");
+  });
+
+  it("keeps a whole pet in a zone narrower than the pet", () => {
+    const narrow: Band = { left: 300, right: 340, floor: 900 };
+    const body = createBody(0, world(0, null, { zone: narrow }));
+    expect(body.x).toBe(320);
+    run(body, "idle", 0, 30, null, { zone: narrow, random: () => 0.1 });
+    expect(body.x).toBe(320);
+  });
+
+  it("can stand still and stay awake", () => {
+    const body = createBody(0, world(0));
+    const x = body.x;
+    run(body, "idle", 0, SLEEP_AFTER_MS / 1000 + 5, null, { random: () => 0.1, wander: false, doze: false });
+    expect([body.pose, body.x]).toEqual(["idle", x]);
+  });
+
+  it("stays home for a call when told to, and cheers for a limit reset", () => {
+    const body = createBody(0, world(0, null, { zone }));
+    const x = body.x;
+    run(body, "done", 0, 3, { x: 1200, y: 200 }, { zone }, { travel: "stay" });
+    expect([body.pose, body.x, body.y]).toEqual(["done", x, 800]);
+    run(body, "idle", 3000, SLEEP_AFTER_MS / 1000 + 5, null, { zone }, { reset: true });
+    expect(body.pose).toBe("happy");
+  });
+
+  it("walks to the cursor for a question when told to", () => {
+    const body = createBody(0, world(0));
+    const cursor = { x: 300, y: 300 };
+    run(body, "needs-you", 0, 4, cursor, {}, { travel: "walk" });
+    expect(Math.hypot(cursor.x - body.x, cursor.y - (body.y - SIZE * 0.45))).toBeLessThan(SIZE * 1.1);
+    expect(body.pose).toBe("needsyou");
+  });
+});
+
+describe("teleporting", () => {
+  const zone: Band = { left: 1000, right: 1600, floor: 900 };
+
+  it("falls into one portal and jumps out of another beside the cursor", () => {
+    const body = createBody(0, world(0, null, { zone }));
+    const start = { x: body.x, y: body.y };
+    const cursor = { x: 300, y: 300 };
+    stepBody(body, "done", world(16, cursor, { zone }), { travel: "teleport" });
+    expect(body.phase).toBe("warp");
+    const view = warpView(body, 16)!;
+    expect(view.portals[0]).toMatchObject({ x: start.x, y: start.y, exit: false });
+    expect(view.portals[1].exit).toBe(true);
+    expect(Math.abs(view.portals[1].x - cursor.x)).toBeCloseTo(SIZE * 0.7);
+    // Halfway through the fall the pet is below the entry portal's surface.
+    stepBody(body, "done", world(16 + WARP.open + WARP.sink * 0.9, cursor, { zone }), { travel: "teleport" });
+    expect(body.y).toBeGreaterThan(start.y);
+    const now = run(body, "done", 16 + WARP.open + WARP.sink, WARP_MS / 1000, cursor, { zone }, { travel: "teleport" });
+    expect(body.phase).toBe("follow");
+    expect(body.warp).toBeUndefined();
+    expect(Math.hypot(cursor.x - body.x, cursor.y - (body.y - SIZE * 0.45))).toBeLessThan(SIZE * 1.1);
+    expect(warpView(body, now)).toBeNull();
+  });
+
+  it("warps again when the cursor jumps far, and goes home through a portal", () => {
+    const body = createBody(0, world(0, null, { zone }));
+    let now = run(body, "done", 0, WARP_MS / 1000 + 0.5, { x: 300, y: 300 }, { zone }, { travel: "teleport" });
+    expect(body.phase).toBe("follow");
+    // A short move is walked.
+    now = run(body, "done", now, 0.5, { x: 400, y: 320 }, { zone }, { travel: "teleport" });
+    expect(body.phase).toBe("follow");
+    // A long one is warped.
+    stepBody(body, "done", world(now + 16, { x: 1400, y: 300 }, { zone }), { travel: "teleport" });
+    expect(body.phase).toBe("warp");
+    now = run(body, "done", now + 16, WARP_MS / 1000 + 0.5, { x: 1400, y: 300 }, { zone }, { travel: "teleport" });
+    // Cleared: back home through a portal.
+    stepBody(body, "idle", world(now + 16, { x: 1400, y: 300 }, { zone }));
+    expect(body.phase).toBe("warp");
+    expect(body.warp!.then).toBe("ground");
+    run(body, "idle", now + 16, WARP_MS / 1000 + LAND_MS / 1000 + 0.2, null, { zone });
+    expect(body.phase).toBe("ground");
+    expect(body.y).toBe(900);
+    expect(body.x).toBeGreaterThanOrEqual(1000);
+  });
+});
+
+describe("idle moves", () => {
+  it("plays only for a calm pet, then goes back to idling", () => {
+    const body = createBody(0, world(0));
+    run(body, "idle", 0, 0.1);
+    expect(canAct(body)).toBe(true);
+    actBody(body, "claude/stretch", 1000, 100);
+    stepBody(body, "idle", world(200, null, { random: () => 0.1 }));
+    expect(body.act?.id).toBe("claude/stretch");
+    expect(body.wander.walking).toBe(false);
+    run(body, "idle", 200, 1);
+    expect(body.act).toBeUndefined();
+    // Work interrupts a move.
+    actBody(body, "claude/stretch", 5000, 2000);
+    stepBody(body, "working", world(2016));
+    expect(body.act).toBeUndefined();
   });
 });
