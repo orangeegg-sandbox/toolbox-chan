@@ -15,6 +15,7 @@ Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 - Follow `docs/design-system.md` for UI: use the tokens in `src/core/appearance/theme.css`, never raw colors or pixel font sizes.
 - Keep instructions scoped and concise; put implementation detail in `docs/architecture.md` or module READMEs. Do not hand-edit generated output.
 - Relevant checks: `npm run check`, `npm run test:e2e`, and `npm run check:native` for Rust changes.
+- If browser tests time out on `page.goto` with a blank page, the Vite dev server is usually stalled, not the code: agent worktrees under `.claude/worktrees/` and other large folders inside the project slow it down. Keep `vite.config.ts` ignoring them, run the Rust checks separately, and see "When browser tests time out" in `docs/development.md`.
 
 ## Documentation
 - Keep the root `README.md` to a short app introduction, a Tools table, and links to shared documentation.
