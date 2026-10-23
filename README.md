@@ -14,4 +14,4 @@ The name's **Chan** comes from the affectionate Japanese suffix **ちゃん**, r
 
 ## More information
 
-[Development and setup](docs/development.md) · [Architecture and adding tools](docs/architecture.md) · [Design system](docs/design-system.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Using Toolbox-Chan](docs/usage/README.md) · [Development and setup](docs/development.md) · [Testing](docs/test/README.md) · [Architecture and adding tools](docs/architecture.md) · [Design system](docs/design-system.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)

@@ -25,21 +25,11 @@ Open `http://127.0.0.1:1420`. Native clipboard and save dialogs use browser equi
 
 ```sh
 npm run check                          # TypeScript and unit tests
-npm run check:native                   # Rust tests
-npm run test:e2e                       # Browser integration tests
 npm run desktop:build                  # Native packages for the current OS
 npm run desktop:build -- --bundles nsis # Windows installer only
 ```
 
-Browser tests use installed Microsoft Edge on Windows. On macOS/Linux, run `npx playwright install chromium` first. Chinese OCR tests require a CJK system font, such as Microsoft JhengHei or Noto Sans CJK.
-
-### When browser tests time out
-
-If tests fail with `page.goto: Test timeout exceeded` or `net::ERR_ABORTED; maybe frame was detached?` and a blank page, check the dev server before the code. Run `curl -m 5 http://127.0.0.1:1420/` a few times: once the server has warmed up it answers in milliseconds, so no answer within 5 seconds means the dev server is stalled, not that a test is wrong.
-
-- **Big folders inside the project.** Vite watches and scans everything under the project root. Agent sessions keep whole checkouts in `.claude/worktrees/`, each with its own `node_modules`, builds and HTML pages; watching them stalled the dev server for tens of seconds and timed out the command palette tests (October 2026). `vite.config.ts` therefore ignores `src-tauri/` and `.claude/` in the watcher and scans only this checkout's pages (`optimizeDeps.entries`). Keep those settings, and add any new folder that holds another checkout or large generated output.
-- **Someone else's server.** Playwright reuses any server already on port 1420 (`reuseExistingServer`). A dev server started from another folder, such as an agent worktree, serves that folder's code. Stop it, or make sure the server on 1420 is yours, before running tests.
-- **A busy machine.** Do not run `npm run check:native` (a Rust build) at the same time as `npm run test:e2e`; the build can slow page loads past the test timeouts. Rerun only the failures with `npx playwright test --last-failed`.
+See [testing](test/README.md) for every check, browser test setup, and what to do when tests time out.
 
 On Windows, run the built app at `src-tauri/target/release/little-toolbox.exe`, or install the setup executable in `src-tauri/target/release/bundle/nsis/`.
 
@@ -47,25 +37,9 @@ Internal package names, the executable name, the bundle identifier, and saved pr
 
 The [desktop build workflow](../.github/workflows/desktop.yml) supports manual runs and version tags. Build each platform on that platform; macOS/Linux packages need verification on their respective systems. Installers are unsigned until signing identities are configured.
 
-## Preferences
+## Using the app
 
-Open **Settings** for global preferences: appearance, font size, the command palette shortcut, and (in the desktop app) startup. Choose **Light**, **Dark**, or **System** appearance. System follows the device's appearance as it changes. **Font size** offers Small (100%), Medium (125%), Large (150%), and Extra large (175%), with a live example. Medium is the default. Preferences apply throughout the toolbox and are saved locally; browser preview and the desktop app use separate local storage. Tool-specific preferences belong on their own tool pages; for example, open **Image to text → OCR settings** for recognition, online providers, and OCR history.
-
-Both appearances use Toolbox-Chan's **Mint Pocket Helper** palette: mint, deep teal, lilac, butter yellow, and ivory. Light mode uses warm surfaces; dark mode uses deep teal surfaces. The sidebar portrait and tool-library character come from the approved [design reference](design/toolbox-chan/mint-pocket-helper-v2/). Bundled copies live in `src/core/assets/`, with shared colors in `src/core/appearance/theme.css`.
-
-## Command palette
-
-Press and release **Ctrl + Shift twice** within half a second to open the command palette. On Windows desktop, a separate floating palette appears over other apps while the main toolbox stays minimized. Choosing a tool or action restores the main window and uses your existing session. **Escape** or clicking another window hides the floating palette without restoring the toolbox. In browser preview and on other platforms, shortcuts work while the toolbox is focused. **Ctrl/Command + K** and the sidebar search button open the in-app palette.
-
-Search by tool name, ID, description, or keyword. Type **ocr**, then press **Enter** to open Image to text. Use **↑ / ↓**, **Home / End**, and **Enter** to select and run a result; **Escape** or a click outside closes the palette. Type **>** to show actions only. Actions that need an image or extracted text show as unavailable until ready.
-
-Under **Settings → Command palette**, select **Record shortcut** and press a combination with Ctrl, Alt, or Windows/Command. **Escape** cancels recording; **Restore default** returns to the double tap. The preference is stored locally. Windows reports reserved or already registered combinations so you can choose another. The app must remain running for a global shortcut to work; closing the window keeps it running in the tray.
-
-## Tray and startup
-
-Closing the main window hides it; Toolbox-Chan keeps running in the system tray. Click the tray icon to open it again, or choose **Quit Toolbox-Chan** from its menu to exit. **Show pets** in the same menu hides or shows the desktop pets. Opening Toolbox-Chan again while it runs brings the existing window forward.
-
-Installed builds start when you sign in, hidden in the tray. Turn this off under **Settings → Startup**. Development builds (`npm run desktop`) never register themselves to start with the system.
+Preferences, the command palette, and the tray are described in [using Toolbox-Chan](usage/README.md).
 
 ## Pet event API
 

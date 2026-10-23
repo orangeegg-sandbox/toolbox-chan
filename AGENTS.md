@@ -14,14 +14,15 @@ Tauri 2 desktop app with a React/TypeScript UI and independent tool modules.
 - Use core layout components and register new tools through their `ToolDefinition` manifest.
 - Follow `docs/design-system.md` for UI: use the tokens in `src/core/appearance/theme.css`, never raw colors or pixel font sizes.
 - Keep instructions scoped and concise; put implementation detail in `docs/architecture.md` or module READMEs. Do not hand-edit generated output.
-- Relevant checks: `npm run check`, `npm run test:e2e`, and `npm run check:native` for Rust changes.
-- If browser tests time out on `page.goto` with a blank page, the Vite dev server is usually stalled, not the code: agent worktrees under `.claude/worktrees/` and other large folders inside the project slow it down. Keep `vite.config.ts` ignoring them, run the Rust checks separately, and see "When browser tests time out" in `docs/development.md`.
+- Relevant checks: `npm run check`, `npm run test:e2e`, and `npm run check:native` for Rust changes. Before running or debugging tests, read `docs/test/README.md`.
 
 ## Documentation
 - Keep the root `README.md` to a short app introduction, a Tools table, and links to shared documentation.
 - Give every Tools table row an icon, tool name, short description, and separate relative links to `src/tools/<id>/` and `src/tools/<id>/README.md`. Update the table when adding, renaming, or removing a tool.
 - Give every tool a user-facing README in its own folder with usage, settings, shortcuts, and relevant limitations; keep module-specific development notes there too.
-- Keep shared setup, builds, and checks in `docs/development.md`, and architecture details in `docs/architecture.md`.
+- Keep shared setup and builds in `docs/development.md`, testing in `docs/test/`, app-wide usage in `docs/usage/`, architecture in `docs/architecture.md`, design in `docs/design/` and `docs/design-system.md`, and feature specs in `docs/specs/`.
+- Keep main documents (root files, `docs/*.md`, and each folder's `README.md`) short: they say what is where and link to detail. Put new system-wide or global notes, such as troubleshooting, platform quirks, or lessons learned, in a topic file inside the matching `docs/` folder (create a folder if none fits) and link it from that folder's `README.md`. Add only a one-line pointer to a main document, never the full note.
+- This file is the only agent instruction file; `CLAUDE.md` imports it. Edit this file, not `CLAUDE.md`.
 
 <!-- codebase-memory-mcp:start -->
 For structural codebase exploration, use the installed `codebase-memory` skill.

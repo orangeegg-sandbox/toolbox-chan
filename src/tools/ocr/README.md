@@ -72,7 +72,7 @@ Use Ctrl on Windows/Linux and Command on macOS.
 | Restore expanded comparison | Escape |
 | Command palette | Ctrl + Shift twice, or Ctrl/Command + K in app |
 
-Open the command palette and type **ocr**, then press **Enter** to open Image to text. Search **OCR:** to find actions for opening or pasting an image, extracting text, copying, exporting, canceling recognition, and opening OCR settings. **OCR: Open settings** goes directly to OCR's own settings view. Unavailable actions explain what is needed. Extracting with the online engine sends your image to your configured provider, just like the workspace button. Change the palette shortcut in global **Settings → Command palette**; see the [command palette guide](../../../docs/development.md#command-palette) for platform support.
+Open the command palette and type **ocr**, then press **Enter** to open Image to text. Search **OCR:** to find actions for opening or pasting an image, extracting text, copying, exporting, canceling recognition, and opening OCR settings. **OCR: Open settings** goes directly to OCR's own settings view. Unavailable actions explain what is needed. Extracting with the online engine sends your image to your configured provider, just like the workspace button. Change the palette shortcut in global **Settings → Command palette**; see the [command palette guide](../../../docs/usage/README.md#command-palette) for platform support.
 
 ## Development notes
 
