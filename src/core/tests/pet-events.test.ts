@@ -17,6 +17,14 @@ describe("pet event rules", () => {
     })).toBeNull();
     expect(petEventError({ source: "script", emote: "laugh" })).toBeNull();
     expect(petEventError({ source: "script", badge: null })).toBeNull();
+    expect(petEventError({
+      source: "hook",
+      agent: "codex",
+      status: "done",
+      message: { text: "Add pet is ready", action: { type: "open-link", url: "codex://threads/019a-7b3c" } },
+    })).toBeNull();
+    expect(petEventError({ source: "example", message: { text: "Fix the tray is marked as TODO", action: { type: "open-tool", toolId: "example" } } })).toBeNull();
+    expect(petEventError({ source: "limits", agent: "claude", notice: "limit-reset" })).toBeNull();
   });
 
   it("rejects what the native hub rejects", () => {
@@ -41,6 +49,16 @@ describe("pet event rules", () => {
       { source: "hook", badge: { count: 1, action: { type: "open-tool", toolId: "" } } },
       { source: "hook", badge: { count: 1, action: { type: "run-script", path: "x" } } },
       { source: "hook", badge: { count: 1, action: { type: "open-tool", toolId: "a", extra: 1 } } },
+      { source: "hook", message: { text: "" } },
+      { source: "hook", message: { text: "x".repeat(201) } },
+      { source: "hook", message: { text: "hi", colour: "red" } },
+      { source: "hook", message: "hi" },
+      { source: "hook", message: { text: "hi", action: { type: "open-link", url: "https://example.com" } } },
+      { source: "hook", message: { text: "hi", action: { type: "open-link", url: "file:///C:/Windows/system32/calc.exe" } } },
+      { source: "hook", message: { text: "hi", action: { type: "open-link", url: "codex://threads/a b" } } },
+      { source: "hook", message: { text: "hi", action: { type: "open-link", url: "codex://threads/\"x\"" } } },
+      { source: "hook", badge: { count: 1, action: { type: "open-link", url: "claude://" + "x".repeat(300) } } },
+      { source: "hook", notice: "party" },
     ]) expect(petEventError(value), JSON.stringify(value)).not.toBeNull();
   });
 });

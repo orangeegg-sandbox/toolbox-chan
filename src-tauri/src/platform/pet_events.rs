@@ -17,8 +17,12 @@ pub const OPEN_TOOL_EVENT: &str = "pet-open-tool";
 const MAX_SOURCE: usize = 64;
 const MAX_SESSION_ID: usize = 200;
 const MAX_NOTE: usize = 200;
+const MAX_MESSAGE: usize = 200;
 const MAX_TOOL_ID: usize = 64;
+const MAX_URL: usize = 300;
 const MAX_COUNT: u32 = 9999;
+/// Links an action may open: the agents' own apps.
+const LINK_SCHEMES: &[&str] = &["claude", "codex"];
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
@@ -46,19 +50,48 @@ pub enum PetEmote {
     Sleepy,
 }
 
+/// Things that happened outside any one chat.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum PetNotice {
+    /// The agent's usage limit started fresh.
+    LimitReset,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(tag = "type", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum PetAction {
     #[serde(rename_all = "camelCase")]
     OpenTool { tool_id: String },
+    /// Opens a chat in an agent's app, for example `codex://threads/<id>`.
+    OpenLink { url: String },
 }
 
 impl PetAction {
     pub fn validate(&self) -> Result<(), String> {
         match self {
-            Self::OpenTool { tool_id } => check_text("badge action toolId", tool_id, MAX_TOOL_ID),
+            Self::OpenTool { tool_id } => check_text("action toolId", tool_id, MAX_TOOL_ID),
+            Self::OpenLink { url } => {
+                check_text("action url", url, MAX_URL)?;
+                if is_agent_link(url) { Ok(()) } else { Err("The pet event action url must open an agent's app.".into()) }
+            }
         }
     }
+}
+
+fn is_agent_link(url: &str) -> bool {
+    let Some((scheme, rest)) = url.split_once("://") else { return false };
+    LINK_SCHEMES.contains(&scheme)
+        && rest.chars().all(|character| character.is_ascii_alphanumeric() || "._~/%?=&#:@+-".contains(character))
+}
+
+/// What the pet says in a chat bubble. Clicking the bubble runs the action.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PetMessage {
+    pub text: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<PetAction>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -87,6 +120,10 @@ pub struct PetEvent {
     /// Absent leaves this source's badge alone; `null` clears it.
     #[serde(default, deserialize_with = "present", skip_serializing_if = "Option::is_none")]
     pub badge: Option<Option<PetBadge>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<PetMessage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notice: Option<PetNotice>,
 }
 
 fn present<'de, D: Deserializer<'de>, T: Deserialize<'de>>(deserializer: D) -> Result<Option<Option<T>>, D::Error> {
@@ -129,8 +166,16 @@ impl PetEvent {
                 action.validate()?;
             }
         }
-        if self.status.is_none() && self.emote.is_none() && self.note.is_none() && self.badge.is_none() {
-            return Err("A pet event needs a status, emote, note, or badge.".into());
+        if let Some(message) = &self.message {
+            check_text("message text", &message.text, MAX_MESSAGE)?;
+            if let Some(action) = &message.action {
+                action.validate()?;
+            }
+        }
+        if self.status.is_none() && self.emote.is_none() && self.note.is_none() && self.badge.is_none()
+            && self.message.is_none() && self.notice.is_none()
+        {
+            return Err("A pet event needs a status, emote, note, badge, message, or notice.".into());
         }
         Ok(())
     }
@@ -238,7 +283,7 @@ pub fn pet_get_state(hub: tauri::State<'_, PetHub>) -> Result<PetState, String> 
     hub.snapshot()
 }
 
-/// Runs a badge's action on behalf of the pet, which does not know what it opens.
+/// Runs a badge's or a message's action on behalf of the pet, which does not know what it opens.
 #[tauri::command]
 pub fn pet_run_action(app: AppHandle, action: PetAction) -> Result<(), String> {
     action.validate()?;
@@ -248,7 +293,31 @@ pub fn pet_run_action(app: AppHandle, action: PetAction) -> Result<(), String> {
             app.emit_to(crate::platform::tray::MAIN_WINDOW, OPEN_TOOL_EVENT, json!({ "toolId": tool_id }))
                 .map_err(|error| error.to_string())
         }
+        PetAction::OpenLink { url } => open_link(&url),
     }
+}
+
+/// Hands an agent link to the app registered for its scheme. The pet window was
+/// just clicked, so Windows lets that app come to the front.
+#[cfg(windows)]
+fn open_link(url: &str) -> Result<(), String> {
+    use std::{ffi::c_void, os::windows::ffi::OsStrExt};
+    #[link(name = "shell32")]
+    extern "system" {
+        fn ShellExecuteW(window: *mut c_void, verb: *const u16, file: *const u16, parameters: *const u16, directory: *const u16, show: i32) -> isize;
+    }
+    const SW_SHOWNORMAL: i32 = 1;
+    let wide = |text: &str| std::ffi::OsStr::new(text).encode_wide().chain(Some(0)).collect::<Vec<u16>>();
+    let (verb, file) = (wide("open"), wide(url));
+    let result = unsafe { ShellExecuteW(std::ptr::null_mut(), verb.as_ptr(), file.as_ptr(), std::ptr::null(), std::ptr::null(), SW_SHOWNORMAL) };
+    // Values above 32 mean success.
+    if result > 32 { Ok(()) } else { Err("The agent's app could not be opened. Is it installed?".into()) }
+}
+
+#[cfg(not(windows))]
+fn open_link(url: &str) -> Result<(), String> {
+    let opener = if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
+    std::process::Command::new(opener).arg(url).spawn().map(|_| ()).map_err(|error| error.to_string())
 }
 
 #[cfg(test)]
@@ -276,6 +345,13 @@ mod tests {
             action: Some(PetAction::OpenTool { tool_id: "example".into() }),
         })));
         assert!(parse(json!({ "source": "script", "emote": "laugh" })).is_ok());
+        let event = parse(json!({
+            "source": "hook", "agent": "codex", "status": "done",
+            "message": { "text": "Add pet is ready", "action": { "type": "open-link", "url": "codex://threads/019a-7b3c" } }
+        })).unwrap();
+        assert_eq!(event.message.unwrap().action, Some(PetAction::OpenLink { url: "codex://threads/019a-7b3c".into() }));
+        assert_eq!(parse(json!({ "source": "limits", "agent": "claude", "notice": "limit-reset" })).unwrap().notice, Some(PetNotice::LimitReset));
+        assert!(parse(json!({ "source": "x", "message": { "text": "Fix it is marked as TODO", "action": { "type": "open-tool", "toolId": "x" } } })).is_ok());
         assert_eq!(parse(json!({ "source": "script", "badge": null })).unwrap().badge, Some(None));
     }
 
@@ -305,6 +381,16 @@ mod tests {
             json!({ "source": "hook", "badge": { "count": 1, "action": { "type": "open-tool", "toolId": "" } } }),
             json!({ "source": "hook", "badge": { "count": 1, "action": { "type": "run-script", "path": "x" } } }),
             json!({ "source": "hook", "badge": { "count": 1, "action": { "type": "open-tool", "toolId": "a", "extra": 1 } } }),
+            json!({ "source": "hook", "message": { "text": "" } }),
+            json!({ "source": "hook", "message": { "text": "x".repeat(201) } }),
+            json!({ "source": "hook", "message": { "text": "hi", "colour": "red" } }),
+            json!({ "source": "hook", "message": "hi" }),
+            json!({ "source": "hook", "message": { "text": "hi", "action": { "type": "open-link", "url": "https://example.com" } } }),
+            json!({ "source": "hook", "message": { "text": "hi", "action": { "type": "open-link", "url": "file:///C:/Windows/system32/calc.exe" } } }),
+            json!({ "source": "hook", "message": { "text": "hi", "action": { "type": "open-link", "url": "codex://threads/a b" } } }),
+            json!({ "source": "hook", "message": { "text": "hi", "action": { "type": "open-link", "url": "codex://threads/\"x\"" } } }),
+            json!({ "source": "hook", "badge": { "count": 1, "action": { "type": "open-link", "url": format!("claude://{}", "x".repeat(300)) } } }),
+            json!({ "source": "hook", "notice": "party" }),
         ] {
             assert!(parse(value.clone()).is_err(), "accepted {value}");
         }

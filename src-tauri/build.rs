@@ -26,6 +26,12 @@ const COMMANDS: &[&str] = &[
     "agent_pet_hooks",
     "agent_pet_install_hooks",
     "agent_pet_remove_hooks",
+    "agent_pet_idle_moves",
+    "agent_pet_import_idle_move",
+    "agent_pet_remove_idle_move",
+    "agent_pet_limits",
+    "agent_pet_install_status_line",
+    "agent_pet_remove_status_line",
 ];
 
 fn main() {

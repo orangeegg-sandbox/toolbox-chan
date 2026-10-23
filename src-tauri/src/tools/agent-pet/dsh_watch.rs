@@ -4,6 +4,7 @@
 //! quiet for a while after working counts as done. This is a guess from file
 //! times only: a long tool run without writes can look finished.
 
+use super::hook_cli;
 use crate::platform::pet_events::{AgentId, PetEvent, PetHub, PetStatus};
 use serde_json::json;
 use std::{
@@ -71,14 +72,19 @@ fn watch(app: AppHandle) {
         let sessions = scan(&root);
         let tracker = tracker.get_or_insert_with(Tracker::default);
         for change in tracker.observe(Instant::now(), sessions) {
+            let note = Some(change.project).filter(|project| !project.is_empty());
+            // DSH has no link to a chat, so its bubble only says what happened.
+            let message = hook_cli::status_message(change.status, note.as_deref(), None);
             let event = PetEvent {
                 source: "hook".into(),
                 agent: Some(AgentId::Deepseek),
                 session_id: Some(change.session),
                 status: Some(change.status),
                 emote: None,
-                note: Some(change.project).filter(|project| !project.is_empty()),
+                note,
                 badge: None,
+                message,
+                notice: None,
             };
             let _ = app.state::<PetHub>().publish(&app, event);
         }

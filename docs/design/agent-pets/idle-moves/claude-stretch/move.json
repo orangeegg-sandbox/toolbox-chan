@@ -1,0 +1,8 @@
+{
+  "format": 1,
+  "agent": "claude",
+  "name": "stretch",
+  "label": "Stretch",
+  "fps": 6,
+  "loops": 1
+}

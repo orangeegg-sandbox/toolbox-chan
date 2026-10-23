@@ -13,3 +13,7 @@ The agent pets are chibi desktop companions for the coding agents that Toolbox-C
 | Claude-Chan | Claude Code | Ninon | [claude-chan-reference.webp](references/claude-chan-reference.webp) |
 
 The chibi sprites made from these references are derived works and carry the same non-commercial restriction.
+
+## Idle moves
+
+Extra idle animations, their format, and a prompt for making new ones with an image AI are in [idle-moves.md](idle-moves.md). One demo move per pet is in `idle-moves/`.

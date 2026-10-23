@@ -1,0 +1,8 @@
+{
+  "format": 1,
+  "agent": "deepseek",
+  "name": "dance",
+  "label": "Little dance",
+  "fps": 6,
+  "loops": 2
+}

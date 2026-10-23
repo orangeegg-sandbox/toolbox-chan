@@ -7,18 +7,25 @@ import {
 import { PETS } from "../pets";
 import { PET_SIZES, usePetSettings, type PetSize } from "../settings";
 import { SpritePlayer } from "../sprites/SpritePlayer";
+import { BehaviourSettings } from "./BehaviourSettings";
 import { HooksSettings } from "./HooksSettings";
+import { IdleSettings } from "./IdleSettings";
+import { LimitSettings } from "./LimitSettings";
 
 const SIZE_LABELS: Record<PetSize, string> = { small: "Small", medium: "Medium", large: "Large" };
 const TEST = { source: "agent-pet", sessionId: "pet-settings-test", note: "Test from pet settings" } as const;
+const TEST_MESSAGES: Partial<Record<PetStatus, string>> = { done: "Test chat is ready", "needs-you": "Test chat needs you" };
 
 /** The pet tool's page is its settings: the pets themselves live in their own window. */
 export default function AgentPetWorkspace({ tool }: ToolSurfaceProps) {
   return (
     <ToolPage tool={tool} className="agent-pet-settings">
       <PetsSettings />
+      <BehaviourSettings />
+      <IdleSettings />
       <DoorSettings />
       <HooksSettings />
+      <LimitSettings />
       <Credits />
     </ToolPage>
   );
@@ -36,7 +43,8 @@ function PetsSettings() {
       stop();
     };
   }, []);
-  const status = (value: PetStatus) => void notifyPet({ ...TEST, status: value });
+  const status = (value: PetStatus) => void notifyPet({ ...TEST, status: value, ...(TEST_MESSAGES[value] && { message: { text: TEST_MESSAGES[value] } }) });
+  const send = (event: Omit<PetEvent, "source">) => void notifyPet({ source: TEST.source, ...event });
   const badge = (value: PetEvent["badge"]) => void notifyPet({ source: TEST.source, badge: value });
   return (
     <section className="settings-card" aria-labelledby="pets-heading">
@@ -82,13 +90,27 @@ function PetsSettings() {
       <div className="setting-row">
         <div>
           <strong>Try the pets</strong>
-          <p>Sends a test event to every pet that is on. Click a finished pet to clear its red dot.</p>
+          <p>Sends a test event to every pet that is on. Click a pet or its bubble to clear it.</p>
         </div>
         <div className="pet-actions">
           <button type="button" className="button secondary" onClick={() => status("working")}>Working</button>
           <button type="button" className="button secondary" onClick={() => status("done")}>Done</button>
           <button type="button" className="button secondary" onClick={() => status("needs-you")}>Needs you</button>
           <button type="button" className="button secondary" onClick={() => status("idle")}>Idle</button>
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => send({ message: { text: "Try the pets is marked as TODO", action: { type: "open-tool", toolId: "agent-pet" } } })}
+          >
+            Notice
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => send({ notice: "limit-reset", message: { text: "Your usage limit is reset" } })}
+          >
+            Limit reset
+          </button>
           <button
             type="button"
             className="button secondary"

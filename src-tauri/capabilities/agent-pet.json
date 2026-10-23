@@ -3,24 +3,31 @@
   "capabilities": [
     {
       "identifier": "agent-pet-window-capability",
-      "description": "The desktop pet window reads the pet state, follows pet events and its cursor, runs badge actions, and reports where clicks may land.",
+      "description": "The desktop pet window reads the pet state and its idle moves, follows pet events and its cursor, runs badge and bubble actions, and reports where clicks may land.",
       "windows": ["agent-pet"],
       "permissions": [
         "core:event:allow-listen",
         "core:event:allow-unlisten",
         "allow-pet-get-state",
         "allow-pet-run-action",
-        "allow-agent-pet-set-window"
+        "allow-agent-pet-set-window",
+        "allow-agent-pet-idle-moves"
       ]
     },
     {
       "identifier": "agent-pet-settings-capability",
-      "description": "Pet settings in the toolbox window: show, install, and remove the agent hooks that report to the pets.",
+      "description": "Pet settings in the toolbox window: show, install, and remove the agent hooks and the status line wrapper that report to the pets, and manage idle moves.",
       "windows": ["main"],
       "permissions": [
         "allow-agent-pet-hooks",
         "allow-agent-pet-install-hooks",
-        "allow-agent-pet-remove-hooks"
+        "allow-agent-pet-remove-hooks",
+        "allow-agent-pet-idle-moves",
+        "allow-agent-pet-import-idle-move",
+        "allow-agent-pet-remove-idle-move",
+        "allow-agent-pet-limits",
+        "allow-agent-pet-install-status-line",
+        "allow-agent-pet-remove-status-line"
       ]
     }
   ]

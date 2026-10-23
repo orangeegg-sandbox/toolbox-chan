@@ -8,7 +8,10 @@
 //! nothing (some agents add hook output to the chat) and always exits 0 within
 //! a few seconds, so a missing or closed Toolbox-Chan never blocks the agent.
 
-use crate::platform::{pet_door, pet_events::PetEvent};
+use crate::platform::{
+    pet_door,
+    pet_events::{PetAction, PetEvent, PetMessage, PetStatus},
+};
 use serde_json::{json, Value};
 use std::{
     fs::File,
@@ -17,7 +20,7 @@ use std::{
     path::{Component, Path, PathBuf},
     sync::mpsc,
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 pub const FLAG: &str = "--pet-hook";
@@ -29,6 +32,11 @@ const TITLE_TAIL: u64 = 512 * 1024;
 const MAX_TITLE: usize = 80;
 const MAX_PROMPT_TITLE: usize = 60;
 const MAX_NOTE: usize = 200;
+const MAX_MESSAGE: usize = 200;
+/// The Claude desktop app keeps one small JSON file per chat; never spend longer than this looking.
+const CLAUDE_LOOKUP_BUDGET: Duration = Duration::from_millis(400);
+const CLAUDE_LOOKUP_FILES: usize = 2000;
+const CLAUDE_SESSION_FILE_MAX: u64 = 2 * 1024 * 1024;
 
 /// Runs the adapter when the executable was started with `--pet-hook`; `None` starts the app as usual.
 pub fn run_if_requested() -> Option<i32> {
@@ -40,7 +48,7 @@ pub fn run_if_requested() -> Option<i32> {
     if let (Some(agent), Some(status)) = (rest.first(), rest.get(1)) {
         if AGENTS.contains(&agent.as_str()) && STATUSES.contains(&status.as_str()) {
             let input = read_input();
-            let context = Context { home: home_dir(), cwd: std::env::current_dir().ok() };
+            let context = Context { home: home_dir(), cwd: std::env::current_dir().ok(), claude_app: claude_app_folders() };
             if let Some(event) = build_event(agent, status, &input, &context) {
                 let _ = post(&event);
             }
@@ -52,10 +60,90 @@ pub fn run_if_requested() -> Option<i32> {
 struct Context {
     home: Option<PathBuf>,
     cwd: Option<PathBuf>,
+    /// Where the Claude desktop app may keep its chats: `claude-code-sessions` folders.
+    claude_app: Vec<PathBuf>,
 }
 
 fn home_dir() -> Option<PathBuf> {
     std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")).map(PathBuf::from)
+}
+
+/// The Claude desktop app's chat records: `%APPDATA%\Claude` for a regular install, and
+/// `%LOCALAPPDATA%\Claude-Data\<package>` for the packaged one.
+fn claude_app_folders() -> Vec<PathBuf> {
+    let mut folders = Vec::new();
+    if let Some(roaming) = std::env::var_os("APPDATA") {
+        folders.push(PathBuf::from(roaming).join("Claude").join("claude-code-sessions"));
+    }
+    if let Some(local) = std::env::var_os("LOCALAPPDATA") {
+        let packaged = PathBuf::from(local).join("Claude-Data");
+        if let Ok(entries) = std::fs::read_dir(&packaged) {
+            folders.extend(entries.flatten().map(|entry| entry.path().join("claude-code-sessions")));
+        }
+    }
+    folders.retain(|folder| folder.is_dir());
+    folders
+}
+
+/// The bubble a finished or waiting chat shows; `None` for other statuses.
+pub fn status_message(status: PetStatus, subject: Option<&str>, link: Option<String>) -> Option<PetMessage> {
+    let subject = subject.map(str::trim).filter(|subject| !subject.is_empty()).unwrap_or("A chat");
+    let text = match status {
+        PetStatus::Done => format!("{subject} is ready"),
+        PetStatus::NeedsYou => format!("{subject} needs you"),
+        PetStatus::Working | PetStatus::Idle => return None,
+    };
+    Some(PetMessage { text: clean(&text, MAX_MESSAGE), action: link.map(|url| PetAction::OpenLink { url }) })
+}
+
+fn link_safe(id: &str) -> bool {
+    !id.is_empty() && id.chars().all(|character| character.is_ascii_alphanumeric() || character == '-' || character == '_')
+}
+
+/// The Claude desktop app's link for a chat, found by the chat's Claude Code session ID.
+/// A chat in a terminal has none.
+fn claude_link(folders: &[PathBuf], session: &str) -> Option<String> {
+    if !link_safe(session) {
+        return None;
+    }
+    let started = Instant::now();
+    let mut pending: Vec<(PathBuf, usize)> = folders.iter().map(|folder| (folder.clone(), 0)).collect();
+    let mut seen = 0;
+    while let Some((folder, depth)) = pending.pop() {
+        let Ok(entries) = std::fs::read_dir(&folder) else { continue };
+        for entry in entries.flatten() {
+            if started.elapsed() > CLAUDE_LOOKUP_BUDGET || seen >= CLAUDE_LOOKUP_FILES {
+                return None;
+            }
+            let path = entry.path();
+            let Ok(kind) = entry.file_type() else { continue };
+            if kind.is_dir() {
+                if depth < 4 {
+                    pending.push((path, depth + 1));
+                }
+                continue;
+            }
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if !name.starts_with("local_") || !name.ends_with(".json") {
+                continue;
+            }
+            seen += 1;
+            if entry.metadata().map(|metadata| metadata.len()).unwrap_or(u64::MAX) > CLAUDE_SESSION_FILE_MAX {
+                continue;
+            }
+            let Ok(text) = std::fs::read_to_string(&path) else { continue };
+            if !text.contains(session) {
+                continue;
+            }
+            let Ok(record) = serde_json::from_str::<Value>(&text) else { continue };
+            if record["cliSessionId"].as_str() != Some(session) {
+                continue;
+            }
+            let id = record["sessionId"].as_str()?;
+            return (id.starts_with("local_") && link_safe(id)).then(|| format!("claude://claude.ai/epitaxy/{id}"));
+        }
+    }
+    None
 }
 
 /// Waits briefly for stdin to close; a hook runner that keeps it open must not hang the adapter.
@@ -126,19 +214,37 @@ fn build_event(agent: &str, status: &str, input: &Value, context: &Context) -> O
     }))
     .map(|title| clean(&title, MAX_TITLE))
     .filter(|title| !title.is_empty());
+    let subject = title.clone().or_else(|| project.clone());
     let note = match (project, title) {
         (Some(project), Some(title)) => Some(format!("{project} · {title}")),
         (project, title) => project.or(title),
     }
     .map(|note| clean(&note, MAX_NOTE))
     .filter(|note| !note.is_empty());
+    let session = session.filter(|session| !session.is_empty());
 
     let mut event = json!({ "source": "hook", "agent": agent, "status": status });
-    if let Some(session) = session.filter(|session| !session.is_empty()) {
+    if let Some(session) = &session {
         event["sessionId"] = json!(session);
     }
     if let Some(note) = note {
         event["note"] = json!(note);
+    }
+    let bubble = match status {
+        "done" => Some(PetStatus::Done),
+        "needs-you" => Some(PetStatus::NeedsYou),
+        _ => None,
+    };
+    if let Some(pet_status) = bubble {
+        // Only a bubble needs the link, so other statuses never pay for the lookup.
+        let link = session.as_deref().and_then(|session| match agent {
+            "claude" => claude_link(&context.claude_app, session),
+            "codex" => link_safe(session).then(|| format!("codex://threads/{session}")),
+            _ => None,
+        });
+        if let Some(message) = status_message(pet_status, subject.as_deref(), link) {
+            event["message"] = serde_json::to_value(message).ok()?;
+        }
     }
     // Use the app's own rules, so the door never has to reject what this adapter sends.
     PetEvent::parse(event.to_string().as_bytes()).ok()?;
@@ -225,7 +331,7 @@ mod tests {
     }
 
     fn context() -> Context {
-        Context { home: None, cwd: Some(PathBuf::from("C:/Work/fallback")) }
+        Context { home: None, cwd: Some(PathBuf::from("C:/Work/fallback")), claude_app: Vec::new() }
     }
 
     #[test]
@@ -281,17 +387,38 @@ mod tests {
             "{\"id\":\"t-2\",\"thread_name\":\"Other chat\"}\n",
             "{\"id\":\"t-1\",\"thread_name\":\"Renamed chat\"}\n",
         )).unwrap();
-        let context = Context { home: Some(home.clone()), cwd: None };
+        let context = Context { home: Some(home.clone()), cwd: None, claude_app: Vec::new() };
         let input = json!({ "session_id": "t-1", "cwd": "/home/me/projects/api", "hook_event_name": "Stop" });
         assert_eq!(build_event("codex", "done", &input, &context), Some(json!({
-            "source": "hook", "agent": "codex", "status": "done", "sessionId": "t-1", "note": "api · Renamed chat"
+            "source": "hook", "agent": "codex", "status": "done", "sessionId": "t-1", "note": "api · Renamed chat",
+            "message": { "text": "Renamed chat is ready", "action": { "type": "open-link", "url": "codex://threads/t-1" } }
         })));
         let _ = std::fs::remove_dir_all(home);
     }
 
     #[test]
+    fn links_claude_chats_through_the_desktop_apps_records() {
+        let root = scratch("claude-app");
+        let folder = root.join("claude-code-sessions").join("account").join("org");
+        std::fs::create_dir_all(&folder).unwrap();
+        std::fs::write(folder.join("local_aaa-111.json"), r#"{"sessionId":"local_aaa-111","cliSessionId":"other"}"#).unwrap();
+        std::fs::write(folder.join("local_bbb-222.json"), r#"{"sessionId":"local_bbb-222","cliSessionId":"cli-7","title":"x"}"#).unwrap();
+        std::fs::write(folder.join("notes.json"), r#"{"sessionId":"local_zzz","cliSessionId":"cli-7"}"#).unwrap();
+        let context = Context { home: None, cwd: None, claude_app: vec![root.join("claude-code-sessions")] };
+        let event = build_event("claude", "needs-you", &json!({ "session_id": "cli-7", "cwd": "/w/app" }), &context).unwrap();
+        assert_eq!(event["message"], json!({ "text": "app needs you", "action": { "type": "open-link", "url": "claude://claude.ai/epitaxy/local_bbb-222" } }));
+        // A chat in a terminal has no app record, so its bubble has no link.
+        let event = build_event("claude", "done", &json!({ "session_id": "cli-8", "cwd": "/w/app" }), &context).unwrap();
+        assert_eq!(event["message"], json!({ "text": "app is ready" }));
+        // Working and idle events have no bubble.
+        assert!(build_event("claude", "working", &json!({ "session_id": "cli-7" }), &context).unwrap().get("message").is_none());
+        assert_eq!(claude_link(&context.claude_app, "cli-7\"; evil"), None);
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
     fn survives_missing_or_strange_input() {
-        let context = Context { home: None, cwd: None };
+        let context = Context { home: None, cwd: None, claude_app: Vec::new() };
         assert_eq!(build_event("deepseek", "idle", &Value::Null, &context), Some(json!({ "source": "hook", "agent": "deepseek", "status": "idle" })));
         let long = json!({ "session_id": "x".repeat(500), "cwd": "/a/b", "prompt": "line\u{0007}with bell" });
         let event = build_event("codex", "working", &long, &context).unwrap();

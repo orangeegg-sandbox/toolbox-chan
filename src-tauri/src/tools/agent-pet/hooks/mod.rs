@@ -7,6 +7,7 @@
 pub mod claude;
 pub mod codex;
 mod files;
+pub mod status_line;
 
 use super::dsh_watch::{self, DshWatcher};
 use crate::platform::pet_events::AgentId;
@@ -176,7 +177,7 @@ pub fn remove_codex(path: &Path) -> Result<(), String> {
 }
 
 /// The path hooks call. Forward slashes work in every shell the agents use on Windows.
-fn executable() -> Result<String, String> {
+pub fn executable() -> Result<String, String> {
     let path = std::env::current_exe().map_err(|error| format!("Could not find the Toolbox-Chan executable: {error}"))?;
     let text = path.display().to_string();
     let text = text.strip_prefix(r"\\?\").unwrap_or(&text).to_owned();

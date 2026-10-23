@@ -1,0 +1,29 @@
+{
+  "generator": "Codex built-in image_gen",
+  "date": "2026-10-23",
+  "character": "DeepSeek-Chan",
+  "agent": "DeepSeek Harness (DSH)",
+  "artist_credit": "ZipZipPipe",
+  "reference": "../../references/deepseek-chan-reference.webp",
+  "use_case": "identity-preserve / stylized-concept",
+  "request": "../../idle-moves.md",
+  "method": "Six poses generated together as one horizontal strip, then sliced, cleaned and normalized to transparent 256x256 frames.",
+  "assumptions": [
+    "Six frames per move. Right-facing three-quarter view throughout.",
+    "One uniform resize factor per animation; modest pose-dependent silhouette height variation is preserved.",
+    "A gentle grounded side step with no hop; frame 6 settles toward frame 1."
+  ],
+  "post_processing": "System.Drawing: equal-width strip cells, remove detached alpha specks and adjacent-cell fragments, preserve generated transparency, one uniform bicubic scale per animation, centered transparent 256x256 canvases with lowest visible pixel at y=244. Alpha below 12 cleared, alpha at least 245 made opaque. See review.json for exact bounds and checks.",
+  "animations": [
+    {
+      "state": "dance",
+      "frames": 6,
+      "references": [
+        "../../references/deepseek-chan-reference.webp",
+        "../../deepseek/frames/idle-1.png"
+      ],
+      "source_strip": "source-strip.png",
+      "prompt": "Draw a short looping sprite animation of DeepSeek-Chan by ZipZipPipe from the attached reference,\nas a cute moe chibi about 2.5 heads tall, clean anime line art with soft cel shading.\nMatch the attached idle frame exactly: same face, hair, outfit, colours, and size.\nImage 1 original character reference; image 2 approved chibi idle frame, PRIMARY reference for exact proportions, rendering and scale.\n\nMove: a small in-place side-step dance with hands up and a happy face; feet stay on the ground line; whale tail visible as in her idle frames. Must loop smoothly.\nIt plays while she is idle, so it starts and ends close to a calm standing pose.\n\nMake 6 frames as ONE horizontal strip of equal square cells, in order, left to right.\nFacing right, three-quarter view. Feet stay on the same ground line in every cell; no hopping.\nSame character scale in every cell.\nTransparent background.\nNo text, speech bubbles, question marks, badges, UI, shadows on the ground, or scenery.\nModest outfit.\nIdentity: long wavy navy hair fading to bright blue ends, curved ahoge, big blue eyes, white frilly maid headband, navy whale-fin ears with white undersides and light-blue bows. Navy maid dress, white frilly apron showing a small blue whale emblem, white frilly socks, navy Mary Jane shoes, navy horizontal whale tail fluke behind toward image LEFT, fully visible each frame.\n\nMake a subtle cyclic dance: 1 centered near-calm stand, happy small smile, hands loosely raised at chest; 2 small side step toward image right, hands raised to shoulder level, bright happy open smile; 3 weight shifts right, hands gently sway right, feet both on baseline; 4 return centered, eyes happily closed, hands shoulder height; 5 tiny side step left, hands sway left, happy smile; 6 weight returning toward center, small smile, hands lowering toward chest, nearly same silhouette and face as frame 1. Seamless 6-to-1 transition, movements only a few pixels at final 256px size. No vertical bouncing or big tilts. Head height varies by at most 2%. No arms or hands above crown.\nCRITICAL SPACING: EXACTLY SIX complete small figures in ONE horizontal row, six equal virtual square cells. Prefer 3072x512 (6:1). If output is 3:1, top 28% and bottom 28% entirely transparent: each figure only 44% of full canvas height. Every entire silhouette including all hair and whale tail at most 11% of total canvas width. Centers x=8.33%,25%,41.67%,58.33%,75%,91.67%. Generous transparent gaps. No touching or overlapping neighboring drawings, no clipped hair, no borders or labels, no floating symbols, music notes or sparkles."
+    }
+  ]
+}
