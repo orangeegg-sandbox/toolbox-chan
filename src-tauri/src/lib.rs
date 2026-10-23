@@ -4,6 +4,10 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Agent hooks start this executable as a short-lived adapter; it exits before Tauri starts.
+    if let Some(code) = tools::agent_pet::hook_cli::run_if_requested() {
+        std::process::exit(code);
+    }
     tauri::Builder::default()
         // Registered first: a second launch only brings the running toolbox forward.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -23,6 +27,7 @@ pub fn run() {
             if let Err(error) = tools::agent_todo::start(app.handle()) {
                 eprintln!("Agent TODO could not start: {error}");
             }
+            tools::agent_pet::install(app.handle())?;
             // The main window starts hidden so a start with Windows stays in the tray.
             if !platform::tray::started_by_autostart() {
                 let _ = platform::tray::show_main(app.handle());
@@ -32,6 +37,8 @@ pub fn run() {
         .manage(platform::palette_window::PaletteWindowState::default())
         .manage(platform::pet_events::PetHub::default())
         .manage(tools::ocr::online::OnlineRequests::default())
+        .manage(tools::agent_pet::window::PetWindowState::default())
+        .manage(tools::agent_pet::dsh_watch::DshWatcher::default())
         .on_window_event(|window, event| {
             if window.label() != platform::tray::MAIN_WINDOW {
                 return;
@@ -68,7 +75,11 @@ pub fn run() {
             tools::agent_todo::agent_todo_scan_now,
             tools::agent_todo::agent_todo_rules,
             tools::agent_todo::agent_todo_add_rule,
-            tools::agent_todo::agent_todo_remove_rule
+            tools::agent_todo::agent_todo_remove_rule,
+            tools::agent_pet::window::agent_pet_set_window,
+            tools::agent_pet::hooks::agent_pet_hooks,
+            tools::agent_pet::hooks::agent_pet_install_hooks,
+            tools::agent_pet::hooks::agent_pet_remove_hooks
         ])
         .run(tauri::generate_context!())
         .expect("error while running Toolbox-Chan");

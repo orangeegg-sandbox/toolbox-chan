@@ -1,0 +1,218 @@
+/* Pet window: a transparent layer that lets the pointer through, except on the
+   pets' hit boxes and their badges. Decorations are drawn by code over the art. */
+.agent-pet-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--font-sans);
+}
+.agent-pet-layer .agent-pet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.agent-pet-layer .pet-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.agent-pet-layer .pet-hitbox {
+  position: absolute;
+  left: 30%;
+  top: 16%;
+  width: 40%;
+  height: 80%;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+}
+.agent-pet-layer .agent-pet[data-pose="held"] .pet-hitbox {
+  cursor: grabbing;
+}
+.agent-pet-layer .pet-dot {
+  position: absolute;
+  left: 64%;
+  top: 15%;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--error);
+  border: 2px solid var(--panel);
+}
+.agent-pet-layer .pet-question {
+  position: absolute;
+  left: 60%;
+  top: -6%;
+  min-width: 26px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--lilac-line);
+  background: var(--panel);
+  color: var(--lilac);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+.agent-pet-layer .pet-question::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  background: var(--panel);
+  border-right: 1px solid var(--lilac-line);
+  border-bottom: 1px solid var(--lilac-line);
+  transform: rotate(45deg);
+}
+.agent-pet-layer .pet-count {
+  position: absolute;
+  left: 18%;
+  top: 18%;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  line-height: 1.6;
+}
+.agent-pet-layer .pet-badges {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  display: flex;
+  gap: var(--space-1);
+  transform: translateX(-50%);
+}
+.agent-pet-layer .pet-badge {
+  min-width: 20px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--panel);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  line-height: 1.7;
+  text-align: center;
+}
+.agent-pet-layer button.pet-badge {
+  pointer-events: auto;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+}
+.agent-pet-layer button.pet-badge:hover {
+  background: var(--accent-hover);
+}
+.agent-pet-layer .pet-note {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  width: max-content;
+  max-width: 280px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  text-align: center;
+  transform: translate(-50%, calc(-100% - var(--space-1)));
+}
+
+/* Pet settings in the toolbox window. */
+.agent-pet-settings .settings-card:first-child {
+  margin-top: 0;
+}
+.agent-pet-settings .pet-refresh {
+  margin-left: auto;
+}
+.agent-pet-settings .pet-row-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.agent-pet-settings .pet-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--inset);
+  overflow: hidden;
+}
+.agent-pet-settings .pet-thumb > * {
+  width: 100%;
+  height: 100%;
+}
+.agent-pet-settings .pet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.agent-pet-settings .mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  overflow-wrap: anywhere;
+}
+.agent-pet-settings .pet-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+.agent-pet-settings .pet-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--text-subtle);
+}
+.agent-pet-settings .pet-state[data-tone="good"]::before {
+  background: var(--success);
+}
+.agent-pet-settings .pet-state[data-tone="warn"]::before {
+  background: var(--warning);
+}
+.agent-pet-settings .pet-state[data-tone="bad"]::before {
+  background: var(--error);
+}
+.agent-pet-settings .pet-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+.agent-pet-settings .pet-events .small-tag[data-installed="false"] {
+  color: var(--text-subtle);
+  text-decoration: line-through;
+}
+.agent-pet-settings .pet-hook-detail {
+  margin-top: var(--space-2);
+}
+.agent-pet-settings .pet-hook-error {
+  color: var(--error);
+}
+.agent-pet-settings .pet-credits {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.agent-pet-settings .pet-credits ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+}

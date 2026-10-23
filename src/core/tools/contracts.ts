@@ -27,6 +27,20 @@ export interface ToolDefinition {
   keywords?: readonly string[];
   /** Registers a tool-owned ToolCommandHandler under its retained Provider. */
   Commands?: ComponentType;
+  /** Surfaces shown in their own native windows, outside the toolbox shell. */
+  windows?: readonly ToolWindowDefinition[];
+}
+
+/**
+ * A surface rendered alone in a separate window that the tool's native code
+ * opens at `index.html#tool-window/<tool id>/<id>`. It gets the shared
+ * appearance providers and a transparent page, but no shell, no tool
+ * providers, and no other tool's surfaces.
+ */
+export interface ToolWindowDefinition {
+  /** Unique within the tool. */
+  id: string;
+  Surface: ComponentType<ToolSurfaceProps>;
 }
 
 export type ToolboxRoute =

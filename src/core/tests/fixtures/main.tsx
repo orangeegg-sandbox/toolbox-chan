@@ -8,6 +8,8 @@ import {
 import { createRoot } from "react-dom/client";
 import { Calculator, FileText } from "lucide-react";
 import { ToolboxApp } from "../../ToolboxApp";
+import { ToolWindowApp } from "../../ToolWindowApp";
+import { parseToolWindowHash } from "../../windows/toolWindow";
 // Fixture tools use the same SDK entry point as production tools.
 import {
   ToolCommandHandler,
@@ -115,6 +117,16 @@ function NotesWorkspace({ tool }: ToolSurfaceProps) {
     </ToolPage>
   );
 }
+// A window surface has no tool provider; it shows only what it renders itself.
+function CounterWindow({ tool }: ToolSurfaceProps) {
+  const counter = useContext(CounterContext);
+  return (
+    <section aria-label="Counter window">
+      <p>{tool.name} window surface.</p>
+      <p>{counter ? "Provider leaked into the window." : "No tool provider here."}</p>
+    </section>
+  );
+}
 const tools: ToolDefinition[] = [
   {
     id: "counter",
@@ -127,6 +139,7 @@ const tools: ToolDefinition[] = [
     Workspace: CounterWorkspace,
     Commands: CounterCommands,
     Activity: () => <p>Counter activity contribution.</p>,
+    windows: [{ id: "mini", Surface: CounterWindow }],
   },
   {
     id: "notes",
@@ -139,6 +152,8 @@ const tools: ToolDefinition[] = [
     Workspace: NotesWorkspace,
   },
 ];
+const toolWindow = parseToolWindowHash(location.hash);
 createRoot(document.getElementById("root")!).render(
-  <ToolboxApp tools={location.search.includes("empty") ? [] : tools} />,
+  toolWindow ? <ToolWindowApp tools={tools} {...toolWindow} />
+    : <ToolboxApp tools={location.search.includes("empty") ? [] : tools} />,
 );

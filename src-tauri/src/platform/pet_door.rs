@@ -17,7 +17,7 @@ use std::{
 use tauri::{AppHandle, Manager};
 
 pub const PORT: u16 = 47615;
-const PATH: &str = "/pet/events";
+pub const PATH: &str = "/pet/events";
 const MAX_HEAD: usize = 8 * 1024;
 const MAX_BODY: usize = 16 * 1024;
 const TIMEOUT: Duration = Duration::from_secs(2);

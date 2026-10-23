@@ -22,6 +22,10 @@ const COMMANDS: &[&str] = &[
     "agent_todo_rules",
     "agent_todo_add_rule",
     "agent_todo_remove_rule",
+    "agent_pet_set_window",
+    "agent_pet_hooks",
+    "agent_pet_install_hooks",
+    "agent_pet_remove_hooks",
 ];
 
 fn main() {

@@ -1,0 +1,27 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "capabilities": [
+    {
+      "identifier": "agent-pet-window-capability",
+      "description": "The desktop pet window reads the pet state, follows pet events and its cursor, runs badge actions, and reports where clicks may land.",
+      "windows": ["agent-pet"],
+      "permissions": [
+        "core:event:allow-listen",
+        "core:event:allow-unlisten",
+        "allow-pet-get-state",
+        "allow-pet-run-action",
+        "allow-agent-pet-set-window"
+      ]
+    },
+    {
+      "identifier": "agent-pet-settings-capability",
+      "description": "Pet settings in the toolbox window: show, install, and remove the agent hooks that report to the pets.",
+      "windows": ["main"],
+      "permissions": [
+        "allow-agent-pet-hooks",
+        "allow-agent-pet-install-hooks",
+        "allow-agent-pet-remove-hooks"
+      ]
+    }
+  ]
+}
