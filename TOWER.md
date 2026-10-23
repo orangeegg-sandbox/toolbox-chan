@@ -8,7 +8,7 @@
 | image   | Make or fix an image                       | codex  | -      | M    |
 | subtask | A planned step with clear files and output | dsh    | codex  | S    |
 | test    | Write or fix tests for known code          | dsh    | codex  | S    |
-| default | Anything else                              | claude | codex  | M    |
+| default | Anything else                              | dsh    | codex  | M    |
 
 ## Headroom
 An agent takes a task only if it has at least this much left.
