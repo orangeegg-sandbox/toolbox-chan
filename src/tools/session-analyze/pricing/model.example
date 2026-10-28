@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "currency": "USD",
+  "rules": [
+    {
+      "id": "replace-with-model-and-price-version",
+      "model": "replace-with-exact-recorded-model-id",
+      "aliases": [],
+      "effectiveFrom": "2026-10-27T00:00:00Z",
+      "effectiveUntil": null,
+      "source": {
+        "url": "https://example.com/replace-with-official-pricing-source",
+        "checkedAt": "2026-10-27",
+        "notes": "Replace all placeholders with verified prices and dates before renaming to .json. This template contains no real provider prices."
+      },
+      "prices": {
+        "input": "REPLACE_WITH_VERIFIED_USD_PER_MILLION",
+        "cachedInput": "REPLACE_WITH_VERIFIED_USD_PER_MILLION",
+        "cacheWriteInput": null,
+        "output": "REPLACE_WITH_VERIFIED_USD_PER_MILLION"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "session-analyze-capability",
+  "description": "Read local agent sessions, calculate project coverage on request, and export a report from the toolbox window.",
+  "windows": ["main"],
+  "permissions": ["allow-session-analyze-scan", "allow-session-analyze-run", "allow-session-analyze-coverage", "allow-session-analyze-export", "allow-session-analyze-prices", "allow-session-analyze-open-prices"]
+}

@@ -20,6 +20,7 @@ tauri-plugin-dialog = "2"
 tauri-plugin-single-instance = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
+ignore = "0.4"
 toml_edit = "0.25"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 ruzstd = "0.8"

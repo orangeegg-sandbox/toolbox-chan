@@ -1,0 +1,173 @@
+/* Session analysis is a data workspace; use the available desktop width. */
+main:has(.session-analyze-tool) { max-width: none; }
+:where(.session-analyze-tool) { min-width: 0; }
+:where(.session-analyze-tool) [hidden] { display: none !important; }
+:where(.session-analyze-tool) button:focus-visible, :where(.session-analyze-tool) summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+:where(.session-analyze-tool) mark { background: var(--butter-soft); color: var(--butter); border-radius: var(--radius-xs); }
+:where(.session-analyze-tool) .sa-muted { color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-path { font-family: var(--font-mono); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) h3 { margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 600; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) p { line-height: 1.6; }
+:where(.session-analyze-tool) label { display: flex; flex-direction: column; gap: var(--space-2); color: var(--text-muted); font-size: var(--fs-sm); min-width: 0; }
+:where(.session-analyze-tool) input, :where(.session-analyze-tool) select { width: 100%; min-width: 0; box-sizing: border-box; padding: var(--space-2) var(--space-3); color: var(--text); background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font: inherit; min-height: 2.5rem; }
+:where(.session-analyze-tool) input[type="checkbox"] { width: auto; min-height: auto; }
+:where(.session-analyze-tool) .sa-file-input { display: none; }
+:where(.session-analyze-tool) .sa-workspace-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); border-bottom: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+:where(.session-analyze-tool) .sa-busy { display: flex; align-items: center; gap: var(--space-2); color: var(--accent); }
+:where(.session-analyze-tool) .sa-tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); border-bottom: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-workspace-toolbar > .sa-tabs { border-bottom: 0; }
+:where(.session-analyze-tool) .sa-tabs [role="tab"] { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 2.75rem; padding: var(--space-3) var(--space-4); border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--text-muted); font-size: var(--fs-md); font-weight: 500; }
+:where(.session-analyze-tool) .sa-tabs [role="tab"]:hover { background: var(--hover); color: var(--text); }
+:where(.session-analyze-tool) .sa-tabs [aria-selected="true"], :where(.session-analyze-tool) .sa-tabs [aria-selected="true"]:hover { border-bottom-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+:where(.session-analyze-tool) .sa-tab-count { font-family: var(--font-mono); font-size: var(--fs-xs); border-radius: var(--radius-xs); padding: var(--space-1) var(--space-2); background: var(--inset); color: var(--text); }
+:where(.session-analyze-tool) .sa-badge { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); border-radius: var(--radius-xs); background: var(--inset); color: var(--text-muted); font-size: var(--fs-xs); font-weight: 500; white-space: nowrap; }
+:where(.session-analyze-tool) .sa-badge-info, :where(.session-analyze-tool) .sa-kind-context, :where(.session-analyze-tool) .sa-kind-compaction { color: var(--lilac); background: var(--lilac-soft); }
+:where(.session-analyze-tool) .sa-kind-tool, :where(.session-analyze-tool) .sa-operation-read { color: var(--accent); background: var(--accent-soft); }
+:where(.session-analyze-tool) .sa-kind-mcp, :where(.session-analyze-tool) .sa-operation-search { color: var(--lilac); background: var(--lilac-soft); }
+:where(.session-analyze-tool) .sa-operation-list { color: var(--text-muted); background: var(--inset); }
+:where(.session-analyze-tool) .sa-kind-skill, :where(.session-analyze-tool) .sa-operation-write, :where(.session-analyze-tool) .sa-status-unknown { color: var(--warning); background: var(--warning-soft); }
+:where(.session-analyze-tool) .sa-status-error { color: var(--error); background: var(--error-soft); }
+:where(.session-analyze-tool) .sa-status-success { color: var(--success); background: var(--success-soft); }
+:where(.session-analyze-tool) .sa-catalog-summary { display: flex; align-items: center; gap: var(--space-8); margin: var(--space-5) 0 var(--space-6); }
+:where(.session-analyze-tool) .sa-catalog-summary > div:first-child { display: grid; gap: var(--space-2); color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-catalog-summary > div:first-child strong { font: 500 var(--fs-2xl) var(--font-mono); color: var(--text); }
+:where(.session-analyze-tool) .sa-platforms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); flex: 1; }
+:where(.session-analyze-tool) .sa-platform { min-width: 0; display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-3); color: var(--text); }
+:where(.session-analyze-tool) .sa-platform[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+:where(.session-analyze-tool) .sa-platform-track, :where(.session-analyze-tool) .sa-rank-track { grid-column: 1 / -1; display: block; height: var(--space-1); background: var(--line); border-radius: var(--radius-full); overflow: hidden; }
+:where(.session-analyze-tool) .sa-platform-track > span, :where(.session-analyze-tool) .sa-rank-track > span { display: block; height: 100%; background: var(--accent); }
+:where(.session-analyze-tool) .sa-filters { display: grid; grid-template-columns: minmax(14rem, 2fr) minmax(12rem, 2fr) repeat(2, minmax(8rem, 1fr)); gap: var(--space-4); padding: var(--space-5); border-bottom: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-results-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-5); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-view-controls { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-4); }
+:where(.session-analyze-tool) .sa-date-basis { margin: var(--space-1) 0 0; }
+:where(.session-analyze-tool) .sa-session-list { min-width: 0; }
+:where(.session-analyze-tool) .sa-session-group > summary { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-5); cursor: pointer; background: var(--inset); border-block: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-session-group > summary::before { content: "›"; display: inline-block; color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-session-group[open] > summary::before { transform: rotate(90deg); }
+:where(.session-analyze-tool) .sa-project-path { font-size: var(--fs-sm); color: var(--text-muted); margin-left: var(--space-3); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-session-group > ul { list-style: none; padding: 0; margin: 0; }
+:where(.session-analyze-tool) .sa-session-group li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-session-title { display: grid; gap: var(--space-2); min-width: 0; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-selected { background: var(--accent-soft); }
+:where(.session-analyze-tool) .sa-report, :where(.session-analyze-tool) .sa-catalog { min-width: 0; }
+:where(.session-analyze-tool) .sa-report-body { padding: var(--space-5); }
+:where(.session-analyze-tool) .sa-report-header { display: flex; justify-content: space-between; gap: var(--space-4); align-items: start; }
+:where(.session-analyze-tool) .sa-report-header > div { min-width: 0; }
+:where(.session-analyze-tool) .sa-report-header h3 { font-size: var(--fs-xl); margin-bottom: var(--space-2); }
+:where(.session-analyze-tool) .sa-report-header .sa-path { margin: 0; color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-report-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: var(--space-2); }
+:where(.session-analyze-tool) .sa-report-meta > .sa-muted { width: 100%; text-align: right; }
+:where(.session-analyze-tool) .sa-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin: var(--space-5) 0; }
+:where(.session-analyze-tool) .sa-metrics > button { display: flex; flex-direction: column; align-items: start; text-align: left; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--inset); color: var(--text); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-metrics > button:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+:where(.session-analyze-tool) .sa-metrics span, :where(.session-analyze-tool) .sa-metrics small { color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-metrics strong { font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 500; }
+:where(.session-analyze-tool) .sa-report-section { padding-top: var(--space-5); min-width: 0; }
+:where(.session-analyze-tool) .sa-section { margin: var(--space-5) 0; min-width: 0; }
+:where(.session-analyze-tool) .sa-section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+:where(.session-analyze-tool) .sa-section-heading h3 { margin: 0; }
+:where(.session-analyze-tool) .sa-note { margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-note summary { cursor: pointer; font-weight: 500; }
+:where(.session-analyze-tool) .sa-note ul { padding-left: var(--space-5); line-height: 1.8; }
+:where(.session-analyze-tool) .sa-analysis-notes > summary { display: flex; align-items: center; gap: var(--space-2); color: var(--warning); }
+:where(.session-analyze-tool) .sa-rates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+:where(.session-analyze-tool) .sa-cost-view > section { margin-bottom: var(--space-6); }
+:where(.session-analyze-tool) .sa-token-track { height: var(--space-3); background: var(--line); border-radius: var(--radius-full); overflow: hidden; }
+:where(.session-analyze-tool) .sa-token-track > span { display: block; height: 100%; background: var(--accent); }
+:where(.session-analyze-tool) .sa-evidence { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+:where(.session-analyze-tool) .sa-evidence-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--space-3); margin: var(--space-3) 0; }
+:where(.session-analyze-tool) .sa-selection { background: var(--accent-soft); color: var(--accent); padding: var(--space-3); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-result-count { font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-result-count > span { color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-events { list-style: none; padding: 0; margin: 0; }
+:where(.session-analyze-tool) .sa-events > li { border-bottom: 1px solid var(--line); padding: var(--space-3) 0; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-events summary { cursor: pointer; line-height: 1.8; font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-events summary > * { margin-right: var(--space-3); }
+:where(.session-analyze-tool) .sa-event-order { font-family: var(--font-mono); color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-event-detail { padding-left: var(--space-5); }
+:where(.session-analyze-tool) pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow: auto; font-family: var(--font-mono); font-size: var(--fs-sm); padding: var(--space-4); background: var(--inset); border-radius: var(--radius-sm); line-height: 1.7; }
+:where(.session-analyze-tool) .sa-table-scroll { overflow-x: auto; }
+:where(.session-analyze-tool) table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+:where(.session-analyze-tool) th, :where(.session-analyze-tool) td { text-align: left; padding: var(--space-3); border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) th { color: var(--text-muted); font-weight: 500; background: var(--inset); }
+:where(.session-analyze-tool) tbody tr:hover { background: var(--hover); }
+:where(.session-analyze-tool) .sa-operation-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-4) 0; }
+:where(.session-analyze-tool) .sa-operation { display: flex; gap: var(--space-3); align-items: center; border: 1px solid transparent; border-radius: var(--radius-sm); padding: var(--space-3); text-align: left; }
+:where(.session-analyze-tool) .sa-operation strong { font: 500 var(--fs-xl) var(--font-mono); }
+:where(.session-analyze-tool) .sa-operation[aria-pressed="true"] { border-color: currentColor; }
+:where(.session-analyze-tool) .sa-overview-links, :where(.session-analyze-tool) .sa-context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); margin-top: var(--space-5); }
+:where(.session-analyze-tool) .sa-overview-link { display: flex; gap: var(--space-3); align-items: center; text-align: left; color: var(--text); background: var(--inset); border: 1px solid var(--line); padding: var(--space-4); border-radius: var(--radius-sm); }
+:where(.session-analyze-tool) .sa-overview-link:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+:where(.session-analyze-tool) .sa-overview-link span { display: grid; gap: var(--space-2); }
+:where(.session-analyze-tool) .sa-overview-link small { color: var(--text-muted); }
+:where(.session-analyze-tool) .sa-ranked-list { list-style: none; margin: 0; padding: var(--space-1); max-height: calc(var(--space-10) * 10); overflow: auto; }
+:where(.session-analyze-tool) .sa-ranked-list:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+:where(.session-analyze-tool) .sa-ranked-list button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); text-align: left; width: 100%; padding: var(--space-3) 0; background: transparent; color: var(--text); border: 0; font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .sa-ranked-list button:hover { background: var(--hover); }
+:where(.session-analyze-tool) .sa-ranked-list code, :where(.session-analyze-tool) .sa-ranked-list button > span:first-child { overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .sa-ranked-list strong { font-weight: 500; color: var(--accent); }
+:where(.session-analyze-tool) .sa-inline-empty { display: grid; justify-items: center; text-align: center; gap: var(--space-3); color: var(--text-muted); padding: var(--space-8); }
+/* Put session context beside the tool heading, leaving the report for analysis. */
+.session-analyze-tool.sa-has-analysis { display: grid; grid-template-columns: minmax(15rem, 0.65fr) minmax(0, 2fr); gap: var(--space-4) var(--space-6); }
+.session-analyze-tool.sa-has-analysis > .page-heading { grid-column: 1; grid-row: 1; align-self: start; margin-bottom: 0; }
+:where(.session-analyze-tool) .sa-header-summary { grid-column: 2; grid-row: 1; min-width: 0; padding-left: var(--space-5); border-left: 1px solid var(--line); }
+.session-analyze-tool.sa-has-analysis > .sa-workspace-toolbar { grid-column: 1 / -1; grid-row: 2; margin-bottom: 0; }
+.session-analyze-tool.sa-has-analysis > .tool-content, .session-analyze-tool.sa-has-analysis > .sa-busy, .session-analyze-tool.sa-has-analysis > .error-banner { grid-column: 1 / -1; min-width: 0; }
+:where(.session-analyze-tool) .sa-header-summary .sa-report-header { gap: var(--space-3); flex-wrap: wrap; }
+:where(.session-analyze-tool) .sa-header-summary .sa-report-header > div:first-child { flex: 1 1 16rem; }
+:where(.session-analyze-tool) .sa-header-summary .sa-report-header h3 { font-size: var(--fs-lg); }
+:where(.session-analyze-tool) .sa-header-summary .sa-report-meta { flex: 1 1 10rem; font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .sa-header-summary .sa-metrics { margin: var(--space-3) 0 0; gap: var(--space-2); }
+:where(.session-analyze-tool) .sa-header-summary .sa-metrics > button { padding: var(--space-2) var(--space-3); gap: var(--space-1); }
+:where(.session-analyze-tool) .sa-header-summary .sa-metrics span, :where(.session-analyze-tool) .sa-header-summary .sa-metrics small { font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .sa-header-summary .sa-metrics strong { font-size: var(--fs-lg); }
+/* Independent panes keep the source ruler and search in view while evidence scrolls. */
+:where(.session-analyze-tool) .sa-reading-layout, :where(.session-analyze-tool) .sa-files-layout { display: grid; grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.3fr); gap: var(--space-4); height: clamp(30rem, calc(100dvh - 22rem), 70rem); min-width: 0; }
+:where(.session-analyze-tool) .sa-files-layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+:where(.session-analyze-tool) .sa-reading-summary, :where(.session-analyze-tool) .sa-map-pane { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-3); }
+:where(.session-analyze-tool) .sa-reading-summary .sa-activity-charts, :where(.session-analyze-tool) .sa-reading-summary .sa-context-grid { grid-template-columns: 1fr; }
+:where(.session-analyze-tool) .sa-evidence, :where(.session-analyze-tool) .sa-files-evidence { display: flex; flex-direction: column; min-width: 0; min-height: 0; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+:where(.session-analyze-tool) .sa-reader-controls { flex: 0 0 auto; padding: var(--space-3); border-bottom: 1px solid var(--line); background: var(--panel); }
+:where(.session-analyze-tool) .sa-reader-controls .sa-section-heading { margin-top: var(--space-3); margin-bottom: var(--space-2); }
+:where(.session-analyze-tool) .sa-reader-controls .sa-evidence-filters { margin-bottom: 0; }
+:where(.session-analyze-tool) .sa-reader-controls .sa-selection { margin: var(--space-2) 0; padding: var(--space-2); }
+:where(.session-analyze-tool) .sa-event-scroll { flex: 1; min-height: 8rem; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 0 var(--space-3) var(--space-3); }
+:where(.session-analyze-tool) .sa-files-evidence { padding: var(--space-3); }
+:where(.session-analyze-tool) .sa-files-evidence .sa-table-scroll { flex: 1; min-height: 8rem; overflow: auto; overscroll-behavior: contain; }
+:where(.session-analyze-tool) .sa-files-evidence table { min-width: 26rem; }
+:where(.session-analyze-tool) .sa-files-evidence th { white-space: nowrap; }
+:where(.session-analyze-tool) .sa-files-evidence thead { position: sticky; top: 0; z-index: 1; }
+:where(.session-analyze-tool) .sa-files-evidence .sa-operation-counts { gap: var(--space-2); margin: var(--space-2) 0; }
+:where(.session-analyze-tool) .sa-files-evidence .sa-operation { gap: var(--space-2); padding: var(--space-2); flex-wrap: wrap; }
+:where(.session-analyze-tool) .sa-map-pane .pm-project { margin: 0; border: 0; padding: 0; }
+:where(.session-analyze-tool) .sa-reading-summary:focus-visible, :where(.session-analyze-tool) .sa-map-pane:focus-visible, :where(.session-analyze-tool) .sa-event-scroll:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (max-width: 1100px) {
+  .session-analyze-tool.sa-has-analysis { grid-template-columns: 1fr; }
+  :where(.session-analyze-tool) .sa-header-summary { grid-column: 1; grid-row: 2; padding-left: 0; border-left: 0; }
+  .session-analyze-tool.sa-has-analysis > .sa-workspace-toolbar { grid-row: 3; }
+  :where(.session-analyze-tool) .sa-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.session-analyze-tool) .sa-catalog-summary { align-items: stretch; flex-direction: column; gap: var(--space-4); }
+  :where(.session-analyze-tool) .sa-report-header { flex-direction: column; }
+  :where(.session-analyze-tool) .sa-header-summary .sa-report-header > div:first-child,
+  :where(.session-analyze-tool) .sa-header-summary .sa-report-meta { flex: none; width: 100%; }
+  :where(.session-analyze-tool) .sa-report-meta { justify-content: flex-start; }
+  :where(.session-analyze-tool) .sa-report-meta > .sa-muted { text-align: left; width: auto; }
+}
+@media (max-width: 860px) {
+  :where(.session-analyze-tool) .sa-reading-layout, :where(.session-analyze-tool) .sa-files-layout { grid-template-columns: 1fr; height: auto; }
+  :where(.session-analyze-tool) .sa-reading-summary { max-height: 22rem; }
+  :where(.session-analyze-tool) .sa-evidence, :where(.session-analyze-tool) .sa-map-pane, :where(.session-analyze-tool) .sa-files-evidence { height: max(32rem, 75dvh); }
+  :where(.session-analyze-tool) .sa-platforms, :where(.session-analyze-tool) .sa-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.session-analyze-tool) .sa-session-group li { grid-template-columns: 1fr auto; gap: var(--space-3); }
+  :where(.session-analyze-tool) .sa-session-title { grid-column: 1 / -1; }
+  :where(.session-analyze-tool) .sa-session-group li > button { grid-column: 2; grid-row: 2 / span 2; }
+  :where(.session-analyze-tool) .sa-session-group li > .sa-badge { justify-self: start; }
+  :where(.session-analyze-tool) .sa-context-grid, :where(.session-analyze-tool) .sa-overview-links { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  :where(.session-analyze-tool) .sa-filters, :where(.session-analyze-tool) .sa-rates, :where(.session-analyze-tool) .sa-evidence-filters { grid-template-columns: 1fr; }
+  :where(.session-analyze-tool) .sa-operation-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.session-analyze-tool) .sa-report-body { padding: var(--space-3); }
+  :where(.session-analyze-tool) .sa-tabs [role="tab"] { padding-inline: var(--space-2); }
+}

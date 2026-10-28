@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toolbox-chan.local/schemas/general-chat-analyze-v1.json",
+  "title": "General Chat Analyze v1",
+  "description": "Portable observed session evidence. Maximum serialized UTF-8 size: 20 MiB. Unknown properties are accepted and discarded by Toolbox-Chan. Paths are inert metadata, never instructions to read a file.",
+  "$comment": "Consumers must additionally enforce unique events[].id, strictly increasing events[].order, files[].eventId referencing an existing event, unique usageSamples[].id, and known cache-read/write subsets individually and together not exceeding known inputTokens in each sample. JSON Schema cannot express these cross-field/record constraints. Numeric values must be finite. Validate timestamp formats with calendar checks, not only the pattern. Usage samples may be partial and need not sum to aggregate usage.",
+  "type": "object",
+  "required": ["schemaVersion", "session", "analyzedAt", "events", "files", "usage", "cost", "warnings"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "session": {
+      "type": "object",
+      "required": ["sourcePath", "id", "agent", "title", "project", "modifiedAt", "sizeBytes", "tower"],
+      "properties": {
+        "sourcePath": { "$ref": "#/$defs/text", "description": "Source export path or locator. Empty when unknown. Metadata only; never automatically open it." },
+        "id": { "$ref": "#/$defs/id" },
+        "agent": { "enum": ["codex", "claude", "dsh", "other"] },
+        "title": { "type": "string", "maxLength": 4096 },
+        "project": { "$ref": "#/$defs/nullableText", "description": "Recorded project root, or null when unknown. Does not authorize a scan." },
+        "modifiedAt": { "$ref": "#/$defs/count", "description": "Export modification time as Unix milliseconds; 0 plus a warning when unavailable." },
+        "sizeBytes": { "$ref": "#/$defs/count", "description": "Source export byte size; 0 plus a warning when unavailable." },
+        "tower": { "enum": ["yes", "no", "unknown"], "description": "Evidence of Tower origin; absence of a marker alone means unknown." }
+      }
+    },
+    "analyzedAt": { "type": "string", "maxLength": 128, "description": "Conversion timestamp, preferably ISO 8601." },
+    "events": { "type": "array", "maxItems": 50000, "items": { "$ref": "#/$defs/event" } },
+    "files": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/file" } },
+    "usage": {
+      "type": "object",
+      "required": ["inputTokens", "outputTokens", "cachedInputTokens", "reasoningTokens", "basis"],
+      "properties": {
+        "inputTokens": { "$ref": "#/$defs/nullableCount", "description": "Total input tokens including cache reads and cache writes; null when normalization is unknown." },
+        "outputTokens": { "$ref": "#/$defs/nullableCount", "description": "Total output tokens, including reasoning tokens where separately reported." },
+        "cachedInputTokens": { "$ref": "#/$defs/nullableCount", "description": "Cache-read subset of inputTokens, not an additional input bucket." },
+        "reasoningTokens": { "$ref": "#/$defs/nullableCount", "description": "Reasoning subset of outputTokens, not an additional output bucket." },
+        "basis": { "$ref": "#/$defs/text", "description": "Evidence, scope, and aggregation method. Never sum cumulative snapshots." }
+      }
+    },
+    "usageSamples": {
+      "type": "array",
+      "maxItems": 50000,
+      "items": { "$ref": "#/$defs/usageSample" },
+      "description": "Optional v1 extension containing evidenced per-request usage or non-overlapping deltas with model/time attribution. May be absent, empty, or partial. Never duplicate cumulative snapshots. Partial samples need not sum to aggregate usage; explain scope in usage.basis and warnings."
+    },
+    "usageSamplesComplete": {
+      "type": "boolean",
+      "description": "Optional v1 completeness declaration. True only when the exporter establishes attribution of all session usage, including retries, with no truncated or corrupt omitted source records or ambiguous seeded/fork history. False or absent means incomplete/unknown. Equal token sums alone do not prove completeness. Whole-session pricing requires true plus reconciled totals and complete pricing attribution; otherwise only a partial subtotal is available."
+    },
+    "cost": {
+      "type": "object",
+      "required": ["amount", "currency", "basis", "detail"],
+      "properties": {
+        "amount": { "type": ["number", "null"], "minimum": 0 },
+        "currency": { "const": "USD" },
+        "basis": { "enum": ["reported", "estimated", "unknown"] },
+        "detail": { "$ref": "#/$defs/text", "description": "Evidence for reported amounts; pricing source, date and calculation for estimates; reason when unknown." }
+      },
+      "if": { "properties": { "amount": { "type": "null" } }, "required": ["amount"] },
+      "then": { "properties": { "basis": { "const": "unknown" } } },
+      "else": { "properties": { "basis": { "enum": ["reported", "estimated"] } } }
+    },
+    "warnings": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/text" }, "description": "Missing evidence, partial visibility, truncation, unsupported fields, and uncertainty. Transcripts cannot prove exact model context." }
+  },
+  "$defs": {
+    "text": { "type": "string", "maxLength": 8192 },
+    "nullableText": { "type": ["string", "null"], "maxLength": 8192 },
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "count": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "nullableCount": { "type": ["integer", "null"], "minimum": 0, "maximum": 9007199254740991 },
+    "usageSample": {
+      "type": "object",
+      "required": ["id", "model", "timestamp", "inputTokens", "outputTokens", "cachedInputTokens", "cacheWriteInputTokens", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id", "description": "Unique within usageSamples; a request ID or stable source-based ID." },
+        "model": { "type": ["string", "null"], "minLength": 1, "maxLength": 512, "description": "Exact evidenced model identifier/version for this request or delta, otherwise null. Do not assume the session's final model applies to earlier calls." },
+        "timestamp": {
+          "type": ["string", "null"],
+          "maxLength": 128,
+          "format": "date-time",
+          "pattern": "^(?!0000)([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$",
+          "description": "Evidenced instant in ISO 8601/RFC 3339 form with seconds and an explicit Z or UTC offset; calendar date must be valid. Unknown/unzoned timestamps must be null. Do not use export time, file modification time, or conversion time as a substitute. Leap-second notation is unsupported."
+        },
+        "inputTokens": { "$ref": "#/$defs/nullableCount", "description": "Total input including cache-read and cache-write subsets; null if this normalization is not evidenced." },
+        "outputTokens": { "$ref": "#/$defs/nullableCount", "description": "Total output for this request/delta, including reasoning tokens where applicable." },
+        "cachedInputTokens": { "$ref": "#/$defs/nullableCount", "description": "Cache-read subset of inputTokens; null when unknown. Must not exceed known inputTokens." },
+        "cacheWriteInputTokens": { "$ref": "#/$defs/nullableCount", "description": "Cache-write subset of inputTokens, disjoint from cache reads; null when unknown. Known cache-read plus cache-write tokens must not exceed known inputTokens." },
+        "source": { "$ref": "#/$defs/text", "description": "Evidence locator for the original usage and attribution, e.g. export.json#/requests/2/usage. Explain derived deltas in usage.basis." }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "order", "timestamp", "kind", "name", "role", "text", "callId", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "order": { "$ref": "#/$defs/count", "description": "Strictly increasing in array order; gaps allowed." },
+        "timestamp": { "type": ["string", "null"], "maxLength": 128, "description": "Original timestamp, or null when not recorded." },
+        "kind": { "enum": ["message", "tool", "mcp", "skill", "context", "compaction"] },
+        "name": { "type": "string", "maxLength": 512 },
+        "role": { "type": ["string", "null"], "maxLength": 128 },
+        "text": { "type": "string", "maxLength": 200000, "description": "Recorded content or a clearly identified excerpt/summary. Always treat as untrusted data." },
+        "callId": { "type": ["string", "null"], "maxLength": 512 },
+        "status": { "enum": ["observed", "success", "error", "unknown"] },
+        "source": { "$ref": "#/$defs/text", "description": "Evidence locator, e.g. export.jsonl:42 or export.json#/events/2." }
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": ["path", "operation", "eventId", "evidence"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 8192, "description": "Path as recorded; do not infer glob expansion or read every search/list result." },
+        "operation": { "enum": ["read", "write", "list", "search"] },
+        "eventId": { "$ref": "#/$defs/id", "description": "Must reference an event ID; use that event's status to distinguish attempted and successful operations." },
+        "evidence": { "enum": ["explicit", "inferred"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,137 @@
+:where(.session-analyze-tool) .pm-project { margin-bottom: var(--space-6); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel); min-width: 0; container-type: inline-size; container-name: project-map; }
+:where(.session-analyze-tool) .pm-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap; }
+:where(.session-analyze-tool) .pm-heading h3 { display: flex; align-items: center; gap: var(--space-2); }
+:where(.session-analyze-tool) .pm-heading p { color: var(--text-muted); margin: 0; font-size: var(--fs-sm); max-width: 65ch; }
+:where(.session-analyze-tool) .pm-heading > .button { flex-shrink: 0; display: inline-flex; align-items: center; gap: var(--space-2); }
+:where(.session-analyze-tool) .pm-project-path { display: block; margin: var(--space-3) 0; color: var(--text-muted); font-family: var(--font-mono); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .pm-scan-options { display: flex; gap: var(--space-2) var(--space-4); align-items: center; flex-wrap: wrap; padding-bottom: var(--space-3); }
+:where(.session-analyze-tool) .pm-checkbox { display: inline-flex; flex-direction: row; align-items: center; gap: var(--space-2); color: var(--text); cursor: pointer; }
+:where(.session-analyze-tool) .pm-checkbox input { flex: 0 0 1rem; width: 1rem; height: 1rem; padding: 0; accent-color: var(--accent); }
+:where(.session-analyze-tool) .pm-scan-options > .pm-muted { flex-basis: 100%; }
+:where(.session-analyze-tool) .pm-muted { color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-scan-empty { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-3); background: var(--inset); border-radius: var(--radius-sm); color: var(--text-muted); }
+:where(.session-analyze-tool) .pm-scan-empty p { margin: 0; max-width: 65ch; font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-snapshot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-snapshot-badge { display: inline-flex; align-items: center; gap: var(--space-1); background: var(--inset); border: 1px solid var(--line-strong); border-radius: var(--radius-xs); padding: var(--space-1) var(--space-2); color: var(--text); }
+:where(.session-analyze-tool) .pm-snapshot-fresh { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+:where(.session-analyze-tool) .pm-incomplete { background: var(--warning-soft); color: var(--warning); border: 1px solid var(--warning-line); border-radius: var(--radius-sm); padding: var(--space-3); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-legend { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-2) 0 var(--space-4); }
+:where(.session-analyze-tool) .pm-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-2); margin-bottom: var(--space-3); }
+:where(.session-analyze-tool) .pm-activity-filter { flex: 1 1 12rem; max-width: 20rem; min-width: 0; }
+:where(.session-analyze-tool) .pm-activity-filter select { width: 100%; min-width: 0; }
+:where(.session-analyze-tool) .pm-filter-summary { margin: 0 0 var(--space-3); padding: var(--space-2); border-left: 2px solid var(--accent); background: var(--accent-soft); color: var(--text); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-unmatched-explanation { margin: 0 0 var(--space-3); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-unmatched { margin-bottom: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-unmatched summary { cursor: pointer; color: var(--text); }
+:where(.session-analyze-tool) .pm-unmatched p { margin: var(--space-2) 0; color: var(--text-muted); }
+:where(.session-analyze-tool) .pm-unmatched ul { list-style: none; padding: 0 var(--space-1); margin: 0; max-height: 20rem; overflow: auto; scrollbar-gutter: stable; }
+:where(.session-analyze-tool) .pm-unmatched li { padding: var(--space-2) 0; border-top: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: auto 4rem; }
+:where(.session-analyze-tool) .pm-unmatched code { display: block; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .pm-unmatched-meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); color: var(--text-muted); font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .pm-state { display: inline-flex; align-items: center; gap: var(--space-1); width: max-content; max-width: 100%; padding: var(--space-1) var(--space-2); border: 1px solid var(--line-strong); border-radius: var(--radius-xs); font-size: var(--fs-xs); white-space: nowrap; }
+:where(.session-analyze-tool) .pm-state > span { font-family: var(--font-mono); font-weight: 600; }
+:where(.session-analyze-tool) .pm-state-read { color: var(--lilac); background: var(--lilac-soft); border-color: var(--lilac-line); }
+:where(.session-analyze-tool) .pm-state-write { color: var(--butter); background: var(--butter-soft); border-color: var(--butter-line); }
+:where(.session-analyze-tool) .pm-state-both { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+:where(.session-analyze-tool) .pm-state-untouched { color: var(--text-muted); background: var(--inset); border-color: var(--line-strong); }
+:where(.session-analyze-tool) .pm-state-excluded { color: var(--text-subtle); background: var(--bg); border-color: var(--line-strong); }
+:where(.session-analyze-tool) .pm-breadcrumbs { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-breadcrumbs > span { min-width: 0; display: inline-flex; align-items: center; }
+:where(.session-analyze-tool) .pm-breadcrumbs button { font: inherit; color: var(--accent); background: transparent; border: 0; padding: var(--space-1); border-radius: var(--radius-xs); cursor: pointer; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .pm-breadcrumbs button[aria-current] { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+:where(.session-analyze-tool) .pm-separator { color: var(--text-subtle); margin: 0 var(--space-1); }
+:where(.session-analyze-tool) .pm-folder-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); margin: var(--space-2) 0 var(--space-4); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-folder-summary strong { font-weight: 500; }
+:where(.session-analyze-tool) .pm-folder-summary code { color: var(--text-subtle); overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .pm-map-heading h4, :where(.session-analyze-tool) .pm-tree-heading h4 { margin: 0; font-size: var(--fs-md); font-weight: 600; }
+:where(.session-analyze-tool) .pm-map-heading p, :where(.session-analyze-tool) .pm-tree-heading p { margin: var(--space-1) 0 var(--space-2); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-compact-note { display: none; }
+:where(.session-analyze-tool) .pm-mosaic { position: relative; min-width: 0; height: 36rem; max-height: 36rem; background: var(--inset); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: auto; }
+:where(.session-analyze-tool) .pm-map-cell { position: absolute; padding: var(--space-1); box-sizing: border-box; }
+:where(.session-analyze-tool) .pm-mosaic-scroll { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-2); height: auto; padding: var(--space-2); scrollbar-gutter: stable; }
+:where(.session-analyze-tool) .pm-mosaic-scroll .pm-map-cell { position: static; padding: 0; content-visibility: auto; contain-intrinsic-size: auto 6rem; }
+:where(.session-analyze-tool) .pm-mosaic-scroll .pm-map-tile { min-height: 6rem; }
+:where(.session-analyze-tool) .pm-map-tile { display: flex; flex-direction: column; height: 100%; min-width: 0; overflow: hidden; box-sizing: border-box; border: 1px solid var(--line-strong); border-radius: var(--radius-xs); }
+:where(.session-analyze-tool) .pm-directory-tile { background: var(--panel); color: var(--text); }
+:where(.session-analyze-tool) .pm-tile-heading { display: flex; align-items: flex-start; gap: var(--space-2); min-width: 0; padding: var(--space-2); background: transparent; color: inherit; border: 0; text-align: left; font: inherit; cursor: pointer; }
+:where(.session-analyze-tool) .pm-tile-heading > svg { flex-shrink: 0; margin-top: var(--space-1); }
+:where(.session-analyze-tool) .pm-tile-heading > span { min-width: 0; flex: 1; }
+:where(.session-analyze-tool) .pm-tile-heading strong { display: block; font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(.session-analyze-tool) .pm-tile-heading small { display: block; font-size: var(--fs-xs); margin-top: var(--space-1); }
+:where(.session-analyze-tool) .pm-tile-heading:hover, :where(.session-analyze-tool) .pm-nested-tile:hover { background: var(--hover); }
+:where(.session-analyze-tool) .pm-activity-bar { display: flex; flex-shrink: 0; height: var(--space-1); background: var(--line); margin: 0 var(--space-2) var(--space-2); border-radius: var(--radius-xs); overflow: hidden; }
+:where(.session-analyze-tool) .pm-fill-read { background: var(--lilac); }
+:where(.session-analyze-tool) .pm-fill-write { background: var(--butter); }
+:where(.session-analyze-tool) .pm-fill-both { background: var(--accent); }
+:where(.session-analyze-tool) .pm-fill-untouched { background: var(--line-strong); }
+:where(.session-analyze-tool) .pm-preview-label { padding: 0 var(--space-2) var(--space-1); color: var(--text-subtle); font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .pm-nested-map { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1); padding: 0 var(--space-2) var(--space-2); min-height: 0; overflow: hidden; flex: 1; }
+:where(.session-analyze-tool) .pm-nested-tile { display: flex; align-items: flex-start; gap: var(--space-1); min-width: 0; min-height: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-xs); background: var(--inset); color: var(--text-muted); padding: var(--space-1); text-align: left; font: inherit; font-size: var(--fs-xs); cursor: pointer; }
+:where(.session-analyze-tool) .pm-nested-tile > svg { flex-shrink: 0; }
+:where(.session-analyze-tool) .pm-nested-tile > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(.session-analyze-tool) .pm-nested-tile small { display: block; margin-top: var(--space-1); font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .pm-empty-folder { color: var(--text-subtle); padding: var(--space-2); font-size: var(--fs-xs); }
+:where(.session-analyze-tool) .pm-folder-empty { padding: var(--space-6); background: var(--inset); border-radius: var(--radius-sm); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-selection { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3); margin-top: var(--space-3); background: var(--inset); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-selection strong { font-weight: 500; overflow-wrap: anywhere; }
+:where(.session-analyze-tool) .pm-tree-heading { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+:where(.session-analyze-tool) .pm-search { flex: 1 1 15rem; max-width: 25rem; }
+:where(.session-analyze-tool) .pm-search > span { display: inline-flex; align-items: center; gap: var(--space-1); }
+:where(.session-analyze-tool) .pm-result-count { margin: var(--space-3) 0 var(--space-2); color: var(--text-subtle); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-tree { list-style: none; padding: 0; margin: 0; max-height: 36rem; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: auto; scrollbar-gutter: stable; }
+:where(.session-analyze-tool) .pm-tree-row { position: relative; display: flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2) var(--space-1) calc(var(--space-2) + var(--pm-depth) * var(--space-4)); min-width: 0; min-height: 2.5rem; border-bottom: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: auto 2.5rem; }
+:where(.session-analyze-tool) .pm-tree-row:last-child { border-bottom: 0; }
+:where(.session-analyze-tool) .pm-tree-row::before { content: ""; position: absolute; pointer-events: none; left: calc(var(--space-1) + var(--pm-depth) * var(--space-4)); top: 0; height: 50%; width: var(--space-2); border-left: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+:where(.session-analyze-tool) .pm-tree-row::after { content: ""; position: absolute; pointer-events: none; left: calc(var(--space-1) + var(--pm-depth) * var(--space-4)); top: 50%; bottom: 0; border-left: 1px solid var(--line-strong); }
+:where(.session-analyze-tool) .pm-tree-row:last-child::after { display: none; }
+:where(.session-analyze-tool) .pm-tree-row:hover { background: var(--hover); }
+:where(.session-analyze-tool) .pm-tree-selected { background: var(--accent-soft); }
+:where(.session-analyze-tool) .pm-expand, :where(.session-analyze-tool) .pm-expand-placeholder { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--space-6); width: var(--space-6); height: var(--space-8); box-sizing: border-box; }
+:where(.session-analyze-tool) .pm-expand { background: transparent; border: 0; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-xs); }
+:where(.session-analyze-tool) .pm-tree-name { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0; padding: var(--space-1); background: transparent; border: 0; border-radius: var(--radius-xs); color: var(--text); text-align: left; cursor: pointer; font: inherit; font-family: var(--font-mono); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-tree-name > svg { flex-shrink: 0; color: var(--text-muted); }
+:where(.session-analyze-tool) .pm-tree-name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(.session-analyze-tool) .pm-tree-summary { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: var(--space-1); font-size: var(--fs-xs); color: var(--text-muted); padding-left: var(--space-2); font-variant-numeric: tabular-nums; }
+:where(.session-analyze-tool) .pm-notes { margin-top: var(--space-4); color: var(--text-muted); font-size: var(--fs-sm); }
+:where(.session-analyze-tool) .pm-notes summary { cursor: pointer; }
+:where(.session-analyze-tool) .pm-notes p { max-width: 90ch; }
+:where(.session-analyze-tool) .pm-project button:focus-visible, :where(.session-analyze-tool) .pm-project input:focus-visible, :where(.session-analyze-tool) .pm-project select:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:where(.session-analyze-tool) .pm-project [tabindex="0"]:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:where(.session-analyze-tool) .pm-compact-preview { display: none; }
+/* At high text sizes or narrow widths, legible labels take priority over area. */
+@container project-map (max-width: 60rem) {
+  :where(.session-analyze-tool) .pm-proportional-note { display: none; }
+  :where(.session-analyze-tool) .pm-compact-note { display: inline; }
+  :where(.session-analyze-tool) .pm-mosaic { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); height: auto; padding: var(--space-2); }
+  :where(.session-analyze-tool) .pm-map-cell { position: static; width: auto !important; height: auto !important; padding: 0; }
+  :where(.session-analyze-tool) .pm-map-tile { min-height: 6rem; }
+  :where(.session-analyze-tool) .pm-tile-heading strong { white-space: normal; overflow-wrap: anywhere; }
+  :where(.session-analyze-tool) .pm-nested-map { min-height: 9rem; }
+  :where(.session-analyze-tool) .pm-nested-map.pm-compact-preview { display: grid; }
+  :where(.session-analyze-tool) .pm-empty-folder.pm-compact-preview, :where(.session-analyze-tool) .pm-preview-label.pm-compact-preview { display: block; }
+}
+@container project-map (max-width: 35rem) {
+  :where(.session-analyze-tool) .pm-mosaic { grid-template-columns: 1fr; }
+  :where(.session-analyze-tool) .pm-map-tile { min-height: 0; }
+  :where(.session-analyze-tool) .pm-nested-map { min-height: 0; }
+  :where(.session-analyze-tool) .pm-nested-tile > span { white-space: normal; overflow-wrap: anywhere; }
+  :where(.session-analyze-tool) .pm-tree-row { padding-left: calc(var(--space-1) + min(var(--pm-depth), 4) * var(--space-3)); }
+  :where(.session-analyze-tool) .pm-tree-row::before, :where(.session-analyze-tool) .pm-tree-row::after { left: calc(min(var(--pm-depth), 4) * var(--space-3)); }
+  :where(.session-analyze-tool) .pm-tree-summary { max-width: 45%; }
+  :where(.session-analyze-tool) .pm-tree-summary > span + span { display: none; }
+  :where(.session-analyze-tool) .pm-tree-summary .pm-state { white-space: normal; }
+  :where(.session-analyze-tool) .pm-search { max-width: none; }
+}
+@media (max-width: 700px) {
+  :where(.session-analyze-tool) .pm-project { padding: var(--space-3); }
+  :where(.session-analyze-tool) .pm-heading > .button { min-height: 2.75rem; }
+  :where(.session-analyze-tool) .pm-tree-heading { align-items: stretch; }
+  :where(.session-analyze-tool) .pm-search { max-width: none; }
+  :where(.session-analyze-tool) .pm-tree-row { min-height: 2.75rem; padding-left: calc(var(--space-1) + min(var(--pm-depth), 4) * var(--space-3)); }
+  :where(.session-analyze-tool) .pm-tree-row::before, :where(.session-analyze-tool) .pm-tree-row::after { left: calc(min(var(--pm-depth), 4) * var(--space-3)); }
+  :where(.session-analyze-tool) .pm-tree-summary > span + span { display: none; }
+  :where(.session-analyze-tool) .pm-tree-summary .pm-state { padding: var(--space-1); font-size: var(--fs-xs); }
+  :where(.session-analyze-tool) .pm-tile-heading { gap: var(--space-1); padding: var(--space-1); }
+  :where(.session-analyze-tool) .pm-tile-heading > svg:last-child { display: none; }
+  :where(.session-analyze-tool) .pm-nested-map { grid-template-columns: 1fr; padding: 0 var(--space-1) var(--space-1); }
+}

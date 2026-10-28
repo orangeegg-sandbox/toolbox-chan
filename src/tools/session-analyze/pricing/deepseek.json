@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "currency": "USD",
+  "rules": [
+    {
+      "id": "deepseek-flash-observed-2026-10-27",
+      "model": "deepseek-flash",
+      "aliases": ["deepseek-v4-flash", "deepseek-v4-flash-vision-exp"],
+      "effectiveFrom": "2026-10-27T00:00:00Z",
+      "effectiveUntil": null,
+      "source": {
+        "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "checkedAt": "2026-10-27",
+        "notes": "Observed prices, not a claim about their historical introduction date. Legacy Flash aliases are explicitly documented at these rates. Token charges only; Search/Fetch and other per-request charges are excluded. No separate cache-write price is published in this table."
+      },
+      "prices": { "input": 0.15, "cachedInput": 0.003, "cacheWriteInput": null, "output": 0.6 },
+      "schedule": {
+        "timeZone": "UTC",
+        "windows": [
+          { "weekdays": [1, 2, 3, 4, 5], "start": "01:00", "end": "04:00", "prices": { "input": 0.3, "cachedInput": 0.006, "cacheWriteInput": null, "output": 1.2 } },
+          { "weekdays": [1, 2, 3, 4, 5], "start": "06:00", "end": "10:00", "prices": { "input": 0.3, "cachedInput": 0.006, "cacheWriteInput": null, "output": 1.2 } }
+        ],
+        "calendar": {
+          "timeZone": "Asia/Shanghai",
+          "coverageFrom": "2026-10-27",
+          "coverageUntil": "2027-01-01",
+          "overrides": [],
+          "source": {
+            "url": "https://www.gov.cn/zhengce/content/202511/content_7047090.htm",
+            "checkedAt": "2026-10-27",
+            "notes": "State Council 2026 holiday notice, dated 2025-11-04. Its final holiday period is October 1-7; no public holiday remains in this coverage interval. Holiday dates use China local time; weekday peak windows remain UTC. Extend only after verifying a new calendar."
+          }
+        }
+      }
+    },
+    {
+      "id": "deepseek-v4-pro-observed-2026-10-27",
+      "model": "deepseek-v4-pro",
+      "aliases": [],
+      "effectiveFrom": "2026-10-27T00:00:00Z",
+      "effectiveUntil": null,
+      "source": {
+        "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "checkedAt": "2026-10-27",
+        "notes": "Observed prices, not a claim about their historical introduction date. Token charges only; Search/Fetch and other per-request charges are excluded. No separate cache-write price is published in this table."
+      },
+      "prices": { "input": 0.66, "cachedInput": 0.022, "cacheWriteInput": null, "output": 1.98 },
+      "schedule": {
+        "timeZone": "UTC",
+        "windows": [
+          { "weekdays": [1, 2, 3, 4, 5], "start": "01:00", "end": "04:00", "prices": { "input": 1.32, "cachedInput": 0.044, "cacheWriteInput": null, "output": 3.96 } },
+          { "weekdays": [1, 2, 3, 4, 5], "start": "06:00", "end": "10:00", "prices": { "input": 1.32, "cachedInput": 0.044, "cacheWriteInput": null, "output": 3.96 } }
+        ],
+        "calendar": {
+          "timeZone": "Asia/Shanghai",
+          "coverageFrom": "2026-10-27",
+          "coverageUntil": "2027-01-01",
+          "overrides": [],
+          "source": {
+            "url": "https://www.gov.cn/zhengce/content/202511/content_7047090.htm",
+            "checkedAt": "2026-10-27",
+            "notes": "State Council 2026 holiday notice, dated 2025-11-04. Its final holiday period is October 1-7; no public holiday remains in this coverage interval. Holiday dates use China local time; weekday peak windows remain UTC. Extend only after verifying a new calendar."
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "session": {
+    "sourcePath": "synthetic-export.json",
+    "id": "synthetic-session-001",
+    "agent": "other",
+    "title": "Synthetic example: update a banner",
+    "project": "/example/project",
+    "modifiedAt": 0,
+    "sizeBytes": 0,
+    "tower": "unknown"
+  },
+  "analyzedAt": "2026-10-27T10:00:00Z",
+  "events": [
+    {
+      "id": "event-1", "order": 1, "timestamp": "2026-10-27T09:00:00Z",
+      "kind": "message", "name": "user", "role": "user",
+      "text": "Change the banner text to Welcome back.",
+      "callId": null, "status": "observed", "source": "synthetic-export.json#/events/0"
+    },
+    {
+      "id": "event-2", "order": 2, "timestamp": null,
+      "kind": "context", "name": "Project instructions", "role": "system",
+      "text": "Synthetic harness recorded project instructions from AGENTS.md: Keep text changes accessible.",
+      "callId": null, "status": "observed", "source": "synthetic-export.json#/events/1"
+    },
+    {
+      "id": "event-3", "order": 3, "timestamp": null,
+      "kind": "skill", "name": "accessible-copy", "role": "assistant",
+      "text": "Synthetic harness explicitly loaded skills/accessible-copy/SKILL.md.",
+      "callId": "call-1", "status": "success", "source": "synthetic-export.json#/events/2"
+    },
+    {
+      "id": "event-4", "order": 4, "timestamp": null,
+      "kind": "tool", "name": "read_file", "role": "assistant",
+      "text": "read_file returned src/banner.ts: export const banner = 'Hello';",
+      "callId": "call-2", "status": "success", "source": "synthetic-export.json#/events/3"
+    },
+    {
+      "id": "event-5", "order": 5, "timestamp": null,
+      "kind": "mcp", "name": "mcp__docs__search", "role": "assistant",
+      "text": "Synthetic docs search returned an accessibility reference. This does not establish local file access.",
+      "callId": "call-3", "status": "success", "source": "synthetic-export.json#/events/4"
+    },
+    {
+      "id": "event-6", "order": 6, "timestamp": null,
+      "kind": "compaction", "name": "History summary", "role": "system",
+      "text": "Recorded summary: User requested a banner text change. Exact retained context was not exported.",
+      "callId": null, "status": "observed", "source": "synthetic-export.json#/events/5"
+    },
+    {
+      "id": "event-7", "order": 7, "timestamp": null,
+      "kind": "tool", "name": "write_file", "role": "assistant",
+      "text": "write_file confirmed src/banner.ts now contains: export const banner = 'Welcome back';",
+      "callId": "call-4", "status": "success", "source": "synthetic-export.json#/events/6"
+    },
+    {
+      "id": "event-8", "order": 8, "timestamp": "2026-10-27T09:01:00Z",
+      "kind": "message", "name": "assistant", "role": "assistant",
+      "text": "Updated the banner text to Welcome back.",
+      "callId": null, "status": "observed", "source": "synthetic-export.json#/events/7"
+    }
+  ],
+  "files": [
+    { "path": "AGENTS.md", "operation": "read", "eventId": "event-2", "evidence": "explicit" },
+    { "path": "skills/accessible-copy/SKILL.md", "operation": "read", "eventId": "event-3", "evidence": "explicit" },
+    { "path": "src/banner.ts", "operation": "read", "eventId": "event-4", "evidence": "explicit" },
+    { "path": "src/banner.ts", "operation": "write", "eventId": "event-7", "evidence": "explicit" }
+  ],
+  "usage": {
+    "inputTokens": 1200,
+    "outputTokens": 300,
+    "cachedInputTokens": null,
+    "reasoningTokens": null,
+    "basis": "Synthetic export contains a session total of 1,200 input and 300 output tokens. One request has detailed usage; other requests have no per-call attribution, so usageSamples is partial. Aggregate cache and reasoning counts are absent."
+  },
+  "usageSamples": [
+    {
+      "id": "synthetic-request-1",
+      "model": "example-model-v1",
+      "timestamp": "2026-10-27T09:00:10Z",
+      "inputTokens": 600,
+      "outputTokens": 150,
+      "cachedInputTokens": 100,
+      "cacheWriteInputTokens": 0,
+      "source": "synthetic-export.json#/requests/0/usage"
+    }
+  ],
+  "usageSamplesComplete": false,
+  "cost": {
+    "amount": null,
+    "currency": "USD",
+    "basis": "unknown",
+    "detail": "Synthetic export contains no billed amount or pricing evidence. One request has an invented example model identifier, and other requests lack attribution. Partial samples cannot establish session cost."
+  },
+  "warnings": [
+    "Entirely synthetic fixture for an ExampleHarness export; this is not a real session or a real project path.",
+    "Source modification time and byte size are unavailable; modifiedAt and sizeBytes are 0.",
+    "The export has no positive Tower-origin evidence; tower is unknown.",
+    "Usage samples cover only one synthetic request: 600 of 1,200 total input tokens and 150 of 300 total output tokens. Missing attribution was not invented.",
+    "Recorded events show observed context activity. Hidden instructions, compaction retention, and the exact model context cannot be established."
+  ]
+}
