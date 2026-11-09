@@ -12,6 +12,7 @@ The name's **Chan** comes from the affectionate Japanese suffix **ちゃん**, r
 | ✅ Agent TODO | Collect plan steps your coding agents left unfinished and things they asked you to do, read offline from local chat files. | [Folder](src/tools/agent-todo/) · [README](src/tools/agent-todo/README.md) |
 | 🐾 Agent pets | Desktop pets that show when Claude Code, Codex, or DSH is working, done, or needs you. | [Folder](src/tools/agent-pet/) · [README](src/tools/agent-pet/README.md) |
 | 🔬 Session analyze | Inspect session cost, context, skills, tool calls, and project file coverage from local agent chats. | [Folder](src/tools/session-analyze/) · [README](src/tools/session-analyze/README.md) |
+| 🔍 Text inspector | Reveal hidden characters, inspect line endings, and clean pasted text while preserving Chinese and emoji. | [Folder](src/tools/text-inspector/) · [README](src/tools/text-inspector/README.md) |
 
 ## More information
 
